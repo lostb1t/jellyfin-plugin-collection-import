@@ -35,14 +35,11 @@ public class PluginConfiguration : BasePluginConfiguration
         TrueFalseSetting = true;
         AnInteger = 2;
         AString = "string";
-        Lists = Array.Empty<ListOption>();
+        // Lists = Array.Empty<ListOption>();
     }
 
-    /// <summary>
-    /// Gets or sets a value indicating whether some true or false setting is enabled..
-    /// </summary>
     // public string[] Lists { get; set; }
-    public IReadOnlyList<ListOption> Lists { get; set; } = Array.Empty<ListOption>();
+    // public ListOption[] Lists { get; set; } = Array.Empty<ListOption>();
 
     /// <summary>
     /// Gets or sets a value indicating whether some true or false setting is enabled..

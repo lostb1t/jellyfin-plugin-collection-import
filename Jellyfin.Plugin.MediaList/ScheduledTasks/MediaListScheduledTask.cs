@@ -13,11 +13,11 @@ namespace Jellyfin.Plugin.MediaList;
 /// </summary>
 public class MediaListScheduledTask : IScheduledTask, IConfigurableScheduledTask
 {
-    private readonly IMediaListManager _mediaListManager;
+    private readonly MediaListManager _mediaListManager;
     private readonly IConfigurationManager _config;
 
     public MediaListScheduledTask(
-        IMediaListManager mediaListManager,
+        MediaListManager mediaListManager,
         IConfigurationManager config)
     {
         _mediaListManager = mediaListManager;
