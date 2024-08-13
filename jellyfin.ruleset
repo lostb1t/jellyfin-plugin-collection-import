@@ -3,6 +3,12 @@
     <Rules AnalyzerId="StyleCop.Analyzers" RuleNamespace="StyleCop.Analyzers">
         <!-- disable warning SA1009: Closing parenthesis should be followed by a space. -->
         <Rule Id="SA1009" Action="None" />
+        <Rule Id="CS1591" Action="None" />
+        <Rule Id="SA1114" Action="None" />
+ <GlobalSettings>
+    <BooleanProperty Name="RulesEnabledByDefault">False</BooleanProperty>
+  </GlobalSettings>
+        <Rule Id="*" Action="None" />
         <!-- disable warning SA1011: Closing square bracket should be followed by a space. -->
         <Rule Id="SA1011" Action="None" />
         <!-- disable warning SA1101: Prefix local calls with 'this.' -->
