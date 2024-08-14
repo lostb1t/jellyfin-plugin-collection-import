@@ -28,25 +28,34 @@ public class MediaListManager
     private readonly IFileSystem _fileSystem;
     private readonly IItemRepository _itemRepo;
     private readonly ILibraryManager _libraryManager;
-  
+    private readonly MdbClientManager _mdbClientManager;
+
     public MediaListManager(
         ILogger<MediaListManager> logger,
         IConfigurationManager config,
         IFileSystem fileSystem,
         IItemRepository itemRepo,
-        ILibraryManager libraryManager)
+        ILibraryManager libraryManager,
+        MdbClientManager mdbClientManager)
     {
         _logger = logger;
         _config = config;
         _fileSystem = fileSystem;
         _itemRepo = itemRepo;
         _libraryManager = libraryManager;
+        _mdbClientManager = mdbClientManager;
     }
 
-    public async Task Sync(CancellationToken cancellationToken) 
+    public async Task Sync(CancellationToken cancellationToken)
     {
-      _logger.LogDebug("Refreshing collections");
-      await Task.CompletedTask;
-      //return true;
+        _logger.LogInformation("Refreshing collections");
+        var items = await _mdbClientManager.Request("https://mdblist.com/lists/adamosborne01/trending-shows1/json");
+        foreach (Item a in items)
+        {
+            Console.WriteLine(a.title);
+        }
+
+
+        //return true;
     }
 }

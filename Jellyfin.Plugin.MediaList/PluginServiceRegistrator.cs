@@ -13,6 +13,7 @@ namespace Jellyfin.Plugin.MediaList
         public void RegisterServices(IServiceCollection serviceCollection, IServerApplicationHost applicationHost)
         {
            serviceCollection.AddSingleton<MediaListManager>();
+           serviceCollection.AddSingleton<MdbClientManager>();
         }
     }
 }
