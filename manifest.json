@@ -12,7 +12,7 @@
             "changelog": "Initial Release",
             "targetAbi": "10.8.10.0",
             "sourceUrl": "https://github.com/lostb1t/jellyfin-plugin-media-lists/releases/download/0.1/medialist-0.1.zip",
-            "checksum": "EE9BB3C81109BBD1FB7368D0F354DCF1",
+            "checksum": "f82d574397c3c64ae163b38f7aa0d229",
             "timestamp": "2024-05-12T11:40:00Z"
         }
     ]
