@@ -1,0 +1,19 @@
+[
+    {
+    "guid": "a708187e-5f82-4610-9c84-ec1f2837d5fe",
+    "name": "Media List",
+    "overview": "bla bla",
+    "description": "more bla",
+    "owner": "lostb1t",
+    "category": "General",
+    "versions": [
+        {
+            "version": "0.1",
+            "changelog": "Initial Release",
+            "targetAbi": "10.8.10.0",
+            "sourceUrl": "https://github.com/lostb1t/jellyfin-plugin-media-lists/releases/download/0.1/medialist-0.1.zip",
+            "timestamp": "2024-05-12T11:40:00Z"
+        }
+    ]
+}
+]

@@ -135,7 +135,7 @@ public class MediaListController : ControllerBase
             var items = boxset.GetChildren(user, true, new InternalItemsQuery
             {
                 Limit = limit,
-                IncludeItemTypes = includeItemTypes
+                //IncludeItemTypes = includeItemTypes
             });
             result = new QueryResult<BaseItem>(items);
             Console.WriteLine(result.TotalRecordCount);

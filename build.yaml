@@ -1,7 +1,7 @@
 ---
 name: "MediaList"
 guid: "a708187e-5f82-4610-9c84-ec1f2837d5fe"
-version: "1.0.0.0"
+version: "0.0.0.1"
 targetAbi: "10.9.0.0"
 framework: "net8.0"
 overview: "Short description about your plugin"
@@ -9,7 +9,7 @@ description: >
   This is a longer description that can span more than one
   line and include details about your plugin.
 category: "General"
-owner: "jellyfin"
+owner: "lostb1t"
 artifacts:
 - "Jellyfin.Plugin.MediaList.dll"
 changelog: >
