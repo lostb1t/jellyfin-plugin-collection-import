@@ -81,7 +81,7 @@ public class MediaListManager
         var item_ids = new List<string>();
         foreach (string url in urls)
         {
-            var items = await _mdbClientManager.Request(url);
+            var items = await _mdbClientManager.Request(url.TrimEnd(new Char[] { '/' } ) + "/json");
             
             foreach (MdbItem i in items)
             {

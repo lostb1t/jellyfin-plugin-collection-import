@@ -21,8 +21,8 @@ public class PluginConfiguration : BasePluginConfiguration
         //Console.WriteLine("CALLEEDDDDDP");
         Lists = new []
                 { 
-                 new ListOption {Name = "Trending", Url = "https://mdblist.com/lists/adamosborne01/hmmmmmmmm/json"},
-                 new ListOption {Name = "Trending", Url = "https://mdblist.com/lists/adamosborne01/trending-shows1/json"}
+                 new ListOption {Name = "Trending", Url = "https://mdblist.com/lists/adamosborne01/hmmmmmmmm"},
+                 new ListOption {Name = "Trending", Url = "https://mdblist.com/lists/adamosborne01/trending-shows1"}
                 };
     }
 
