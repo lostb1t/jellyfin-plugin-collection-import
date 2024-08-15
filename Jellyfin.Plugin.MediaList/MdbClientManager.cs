@@ -24,7 +24,7 @@ namespace Jellyfin.Plugin.MediaList
 // #pragma warning restore CA2227 // Collection properties should be read only
 // #pragma warning restore CA1002 // Do not expose generic lists
 //     }
-    public class Item
+    public class MdbItem
     {
         public int? id { get; set; }
         public int? rank { get; set; }
@@ -44,10 +44,10 @@ namespace Jellyfin.Plugin.MediaList
         {
             client = new HttpClient();
         }
-        public async Task<List<Item>> Request(string url)
+        public async Task<List<MdbItem>> Request(string url)
         {
 #pragma warning disable CS8603 // Possible null reference return.
-            return await client.GetFromJsonAsync<List<Item>>(url);
+            return await client.GetFromJsonAsync<List<MdbItem>>(url);
 #pragma warning restore CS8603 // Possible null reference return.
             // var response = client.GetAsync("movie/popular");
             // response.EnsureSuccessStatusCode();
