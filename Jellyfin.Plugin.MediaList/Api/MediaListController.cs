@@ -101,7 +101,8 @@ public class MediaListController : ControllerBase
     public ActionResult<QueryResult<BaseItemDto>> Home(
         [FromQuery] Guid userId,
         [FromQuery] Guid[] collectionIds,
-        [FromQuery] int? limit
+        [FromQuery] int? limit,
+        [FromQuery] BaseItemKind[] includeItemTypes
     //[FromQuery, ModelBinder(typeof(CommaDelimitedArrayModelBinder))] ItemFields[] fields,
     //[FromQuery] Guid collectionId
     )
@@ -121,13 +122,20 @@ public class MediaListController : ControllerBase
         var boxset = boxsets.First();
 
         QueryResult<BaseItem> result;
+        Console.WriteLine(includeItemTypes);
+        // if (includeItemTypes.Length == 0
+        //     && includeItemTypes[0] == BaseItemKind.BoxSet)
+        // {
+        //     parentId = null;
+        // }
 
         if (boxset is not null)
         {
             Console.WriteLine("Boxset is not null");
             var items = boxset.GetChildren(user, true, new InternalItemsQuery
             {
-                Limit = limit
+                Limit = limit,
+                IncludeItemTypes = includeItemTypes
             });
             result = new QueryResult<BaseItem>(items);
             Console.WriteLine(result.TotalRecordCount);
