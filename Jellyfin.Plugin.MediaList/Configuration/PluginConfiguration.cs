@@ -1,24 +1,12 @@
+#pragma warning disable CA2227
 using System;
 using System.Collections.Generic;
 using MediaBrowser.Model.Plugins;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Jellyfin.Plugin.MediaList.Configuration;
 
-/// <summary>
-/// The configuration options.
-/// </summary>
-public enum SomeOptions
-{
-    /// <summary>
-    /// Option one.
-    /// </summary>
-    OneOption,
 
-    /// <summary>
-    /// Second option.
-    /// </summary>
-    AnotherOption
-}
 
 /// <summary>
 /// Plugin configuration.
@@ -30,34 +18,16 @@ public class PluginConfiguration : BasePluginConfiguration
     /// </summary>
     public PluginConfiguration()
     {
-        // set default options here
-        Options = SomeOptions.AnotherOption;
-        TrueFalseSetting = true;
-        AnInteger = 2;
-        AString = "string";
-        // Lists = Array.Empty<ListOption>();
+        //Console.WriteLine("CALLEEDDDDDP");
+        Lists = new []
+                { 
+                 new ListOption {Name = "Trending", Url = "https://mdblist.com/lists/adamosborne01/hmmmmmmmm/json"},
+                 new ListOption {Name = "Trending", Url = "https://mdblist.com/lists/adamosborne01/trending-shows1/json"}
+                };
     }
 
-    // public string[] Lists { get; set; }
-    // public ListOption[] Lists { get; set; } = Array.Empty<ListOption>();
+    [SuppressMessage(category: "Performance", checkId: "CA1819", Target = "ArtworkRepos", Justification = "Xml Serializer doesn't support IReadOnlyList")]
+    public ListOption[] Lists { get; set; }
 
-    /// <summary>
-    /// Gets or sets a value indicating whether some true or false setting is enabled..
-    /// </summary>
-    public bool TrueFalseSetting { get; set; }
 
-    /// <summary>
-    /// Gets or sets an integer setting.
-    /// </summary>
-    public int AnInteger { get; set; }
-
-    /// <summary>
-    /// Gets or sets a string setting.
-    /// </summary>
-    public string AString { get; set; }
-
-    /// <summary>
-    /// Gets or sets an enum option.
-    /// </summary>
-    public SomeOptions Options { get; set; }
 }

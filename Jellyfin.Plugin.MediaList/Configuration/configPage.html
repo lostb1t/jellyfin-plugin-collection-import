@@ -1,55 +1,39 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="utf-8">
-    <title>Template</title>
-</head>
-<body>
-    <div id="TemplateConfigPage" data-role="page" class="page type-interior pluginConfigurationPage" data-require="emby-input,emby-button,emby-select,emby-checkbox">
-        <div data-role="content">
-            <div class="content-primary">
-                <form id="TemplateConfigForm">
-                    <div class="inputContainer">
-                        <label class="inputLabel inputLabelUnfocused" for="Lists">A String</label>
-                        <input id="Lists" name="Lists" type="text" is="emby-input" />
-                        <div class="fieldDescription">url</div>
-                    </div>
-                    <div>
-                        <button is="emby-button" type="submit" class="raised button-submit block emby-button">
-                            <span>Save</span>
-                        </button>
-                    </div>
-                </form>
+<div data-role="page" id="artworkConfigurationPage" class="page type-interior pluginConfigurationPage fullWidthContent"
+     data-controller="__plugin/MediaList.js">
+    <div class="content-primary">
+        <div class="verticalSection">
+            <div class="sectionTitleContainer">
+                <h2 class="sectionTitle">List</h2>
+                <a is="emby-linkbutton" class="raised raised-mini" style="margin-left: 2em;" target="_blank"
+                   href="https://github.com/jellyfin/jellyfin-plugin-artwork">
+                    <i class="md-icon button-icon button-icon-left secondaryText"></i>
+                    <span>Help</span>
+                </a>
             </div>
         </div>
-        <script type="text/javascript">
-            var TemplateConfig = {
-                pluginUniqueId: 'a708187e-5f82-4610-9c84-ec1f2837d5fe'
-            };
 
-            document.querySelector('#TemplateConfigPage')
-                .addEventListener('pageshow', function() {
-                    Dashboard.showLoadingMsg();
-                    ApiClient.getPluginConfiguration(TemplateConfig.pluginUniqueId).then(function (config) {
-                        document.querySelector('#Lists').value = config.Lists[0];
-                        Dashboard.hideLoadingMsg();
-                    });
-                });
-
-            document.querySelector('#TemplateConfigForm')
-                .addEventListener('submit', function(e) {
-                Dashboard.showLoadingMsg();
-                ApiClient.getPluginConfiguration(TemplateConfig.pluginUniqueId).then(function (config) {
-                    config.Lists = document.querySelector('#Lists').value;
-                    ApiClient.updatePluginConfiguration(TemplateConfig.pluginUniqueId, config).then(function (result) {
-                        Dashboard.processPluginConfigurationUpdateResult(result);
-                    });
-                });
-
-                e.preventDefault();
-                return false;
-            });
-        </script>
+        <form class="artworkConfigurationForm">
+            <div id="configurationWrapper"></div>
+            <button id="btnAddRepo" is="emby-button" type="button" class="raised button block">
+                <span>Add new List</span>
+            </button>
+            <br/>
+            <button id="saveConfig" is="emby-button" type="submit" class="raised button-submit block">
+                <span>Save</span>
+            </button>
+        </form>
     </div>
-</body>
-</html>
+
+    <template id="template-repository">
+        <div data-id="repo-config">
+            <div class="inputContainer">
+                <input is="emby-input" type="text" data-id="txtRepositoryName" required="required" label="Collection Name:"/>
+                <span>The collection name.</span>
+            </div>
+            <div class="inputContainer">
+                <input is="emby-input" type="text" data-id="txtRepositoryUrl" required="required" label="List Url:"/>
+                <span>The media list url.</span>
+            </div>
+        </div>
+    </template>
+</div>

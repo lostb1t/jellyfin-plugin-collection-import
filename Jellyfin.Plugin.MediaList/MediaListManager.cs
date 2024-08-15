@@ -23,6 +23,7 @@ using MediaBrowser.Model.LiveTv;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Hosting;
 using Jellyfin.Data.Entities;
+using Jellyfin.Plugin.MediaList.Configuration;
 
 namespace Jellyfin.Plugin.MediaList;
 
@@ -108,20 +109,38 @@ public class MediaListManager
     {
         _logger.LogInformation("Refreshing collections");
         //var items = await _mdbClientManager.Request("https://mdblist.com/lists/adamosborne01/trending-shows1/json");
+        var lists = MediaListPlugin.Instance!.Configuration.Lists;
+        //var grouped = lists.GroupBy(x => new { x.Name, x.Url })
+        // .ToList(); 
+        var grouped = lists.Where(p => !String.IsNullOrEmpty(p.Url) && !String.IsNullOrEmpty(p.Name)).GroupBy(
+    p => p.Name, 
+    p => p.Url!,
+    (key, g) => new { Name = key!, Urls = g.ToList() }).ToList();
+        grouped.ForEach(book => Console.WriteLine(book));
+        
 
         // i have no idea howto query for imdbid at this point so so it the slow way for now.
         var dbItems = _itemRepo.GetItemList(new InternalItemsQuery
         {
             HasImdbId = true
         }).Where(i => !string.IsNullOrEmpty(i.GetProviderId(MetadataProvider.Imdb)));
+        
+   var options = new ParallelOptions()
+    {
+        MaxDegreeOfParallelism = 20
+    };
 
-        await SyncCollection(
-            "Trending",
-            new List<string>
-                { " https://mdblist.com/lists/adamosborne01/hmmmmmmmm/json",
-                "https://mdblist.com/lists/adamosborne01/trending-shows1/json"
-                }
-        , dbItems, cancellationToken);
+    await Parallel.ForEachAsync(grouped, options, async (i, ct) => {
+       await SyncCollection(i.Name, i.Urls, dbItems, ct);
+    });
+        //await grouped.ForEachAsync(async i => await SyncCollection(i.Name, i.Urls, dbItems, cancellationToken));
+        //await SyncCollection(
+        //    "Trending",
+        //    new List<string>
+        //        { " https://mdblist.com/lists/adamosborne01/hmmmmmmmm/json",
+        //        "https://mdblist.com/lists/adamosborne01/trending-shows1/json"
+        //        }
+        //, dbItems, cancellationToken);
 
         //AddToCollectionAsync
         //CreateCollectionAsync
