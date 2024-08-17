@@ -7,6 +7,14 @@
     "owner": "lostb1t",
     "category": "General",
     "versions": [
+       {
+            "version": "0.4",
+            "changelog": "Initial Release",
+            "targetAbi": "10.8.10.0",
+            "sourceUrl": "https://github.com/lostb1t/jellyfin-plugin-media-lists/releases/download/0.4/medialist.zip",
+            "checksum": "b899d89641ceb39793e0fa255195f291",
+            "timestamp": "2024-05-12T11:40:00Z"
+        },
         {
             "version": "0.3",
             "changelog": "Initial Release",
