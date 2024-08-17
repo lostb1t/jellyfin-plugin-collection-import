@@ -58,7 +58,7 @@ public class MediaListScheduledTask : IScheduledTask, IConfigurableScheduledTask
             new TaskTriggerInfo
             {
                 Type = TaskTriggerInfo.TriggerInterval,
-                IntervalTicks = TimeSpan.FromMinutes(30).Ticks
+                IntervalTicks = TimeSpan.FromHours(8).Ticks
             }
         };
     }

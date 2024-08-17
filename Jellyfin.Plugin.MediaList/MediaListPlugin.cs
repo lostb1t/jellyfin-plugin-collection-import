@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using Jellyfin.Plugin.MediaList.Configuration;
 using MediaBrowser.Common.Configuration;
 using MediaBrowser.Common.Plugins;
@@ -39,18 +38,17 @@ public class MediaListPlugin : BasePlugin<PluginConfiguration>, IHasWebPages
     /// <inheritdoc />
     public IEnumerable<PluginPageInfo> GetPages()
     {
-        return new[]
-        {
-            new PluginPageInfo
+            var prefix = GetType().Namespace;
+            yield return new PluginPageInfo
             {
-                Name = this.Name,
-                EmbeddedResourcePath = string.Format(CultureInfo.InvariantCulture, "{0}.Configuration.configPage.html", GetType().Namespace)
-            },
-            new PluginPageInfo
-            {
-                Name = $"{this.Name}.js",
-                EmbeddedResourcePath = string.Format(CultureInfo.InvariantCulture, "{0}.Configuration.config.js", GetType().Namespace)
-            }
-        };
+                Name = Name,
+                EmbeddedResourcePath = prefix + ".Configuration.config.html",
+            };
+
+            // yield return new PluginPageInfo
+            // {
+            //     Name = $"{Name}.js",
+            //     EmbeddedResourcePath = prefix + ".Configuration.config.js"
+            // };
     }
 }

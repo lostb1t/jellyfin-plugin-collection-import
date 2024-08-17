@@ -18,16 +18,23 @@ public class PluginConfiguration : BasePluginConfiguration
     /// </summary>
     public PluginConfiguration()
     {
-        //Console.WriteLine("CALLEEDDDDDP");
-        Lists = new []
-                { 
-                 new ListOption {Name = "Trending", Url = "https://mdblist.com/lists/adamosborne01/hmmmmmmmm"},
-                 new ListOption {Name = "Trending", Url = "https://mdblist.com/lists/adamosborne01/trending-shows1"}
+        ImportSets = new[]
+                {
+                 new ImportSet {
+                   Name = "Trending",
+                   Urls = new [] {"https://mdblist.com/lists/adamosborne01/hmmmmmmmm","https://mdblist.com/lists/adamosborne01/trending-shows1"} },
                 };
     }
 
     [SuppressMessage(category: "Performance", checkId: "CA1819", Target = "ArtworkRepos", Justification = "Xml Serializer doesn't support IReadOnlyList")]
-    public ListOption[] Lists { get; set; }
+    public ImportSet[] ImportSets { get; set ; }
 
-
+        // public ImportSet[] ImportSets { 
+        // get;
+        // set
+        // {
+        //     if (!String.IsNullOrEmpty(value))
+        //         _myValue = value;
+        //     }
+        // }
 }
