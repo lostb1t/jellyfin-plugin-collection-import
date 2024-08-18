@@ -14,7 +14,7 @@ using MediaBrowser.Model.Providers;
 using Microsoft.AspNetCore.Mvc.Routing;
 using Microsoft.Extensions.Caching.Memory;
 
-namespace Jellyfin.Plugin.MediaList
+namespace Jellyfin.Plugin.CollectionImport
 {
 //     public class Result
 //     {

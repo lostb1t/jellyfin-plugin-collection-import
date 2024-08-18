@@ -23,14 +23,14 @@ using MediaBrowser.Model.LiveTv;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Hosting;
 using Jellyfin.Data.Entities;
-using Jellyfin.Plugin.MediaList.Configuration;
+using Jellyfin.Plugin.CollectionImport.Configuration;
 using System.Security.Cryptography.X509Certificates;
 
-namespace Jellyfin.Plugin.MediaList;
+namespace Jellyfin.Plugin.CollectionImport;
 
-public class MediaListManager
+public class CollectionImportManager
 {
-    private readonly ILogger<MediaListManager> _logger;
+    private readonly ILogger<CollectionImportManager> _logger;
     private readonly IConfigurationManager _config;
     private readonly IFileSystem _fileSystem;
     private readonly IItemRepository _itemRepo;
@@ -38,8 +38,8 @@ public class MediaListManager
     private readonly MdbClientManager _mdbClientManager;
     private readonly ICollectionManager _collectionManager;
 
-    public MediaListManager(
-        ILogger<MediaListManager> logger,
+    public CollectionImportManager(
+        ILogger<CollectionImportManager> logger,
         IConfigurationManager config,
         IFileSystem fileSystem,
         IItemRepository itemRepo,
@@ -72,7 +72,7 @@ public class MediaListManager
                 Name = set.Name,
                 IsLocked = true
             });
-            collection.Tags = new[] { "medialist", "promoted", "sf_promoted" };
+            collection.Tags = new[] { "collectionimport", "promoted", "sf_promoted" };
             collection.DisplayOrder = "Default";
             //item.DisplayOrder = "SortName";
             //item.IsPreSorted = true;
@@ -155,7 +155,7 @@ public class MediaListManager
     {
         _logger.LogInformation("Refreshing collections");
         //var items = await _mdbClientManager.Request("https://mdblist.com/lists/adamosborne01/trending-shows1/json");
-        var collections = MediaListPlugin.Instance!.Configuration.ImportSets;
+        var collections = CollectionImportPlugin.Instance!.Configuration.ImportSets;
 
         //    var grouped = lists.Where(p => !String.IsNullOrEmpty(p.Url) && !String.IsNullOrEmpty(p.Name)).GroupBy(
         // p => p.Name, 
@@ -234,7 +234,7 @@ public class MediaListManager
             IncludeItemTypes = new[] { BaseItemKind.BoxSet },
             CollapseBoxSetItems = false,
             Recursive = true,
-            Tags = new[] { "medialist" },
+            Tags = new[] { "collectionimport" },
             Name = name,
         }).Select(b => b as BoxSet).FirstOrDefault();
     }
@@ -255,7 +255,7 @@ public class MediaListManager
             IncludeItemTypes = new[] { BaseItemKind.BoxSet },
             CollapseBoxSetItems = false,
             Recursive = true,
-            Tags = new[] { "medialist" },
+            Tags = new[] { "collectionimport" },
             ItemIds = ids,
         }).Select(b => b as BoxSet).ToList();
     }

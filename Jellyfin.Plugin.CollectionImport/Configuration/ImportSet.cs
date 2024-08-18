@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using MediaBrowser.Model.Plugins;
 using System.Diagnostics.CodeAnalysis;
 
-namespace Jellyfin.Plugin.MediaList.Configuration;
+namespace Jellyfin.Plugin.CollectionImport.Configuration;
 
 /// <summary>
 /// The list options.

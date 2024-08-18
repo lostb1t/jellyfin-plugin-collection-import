@@ -1,5 +1,5 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jellyfin.Plugin.MediaList", "Jellyfin.Plugin.MediaList\Jellyfin.Plugin.MediaList.csproj", "{D921B930-CF91-406F-ACBC-08914DCD0D34}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jellyfin.Plugin.CollectionImport", "Jellyfin.Plugin.CollectionImport\Jellyfin.Plugin.CollectionImport.csproj", "{D921B930-CF91-406F-ACBC-08914DCD0D34}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

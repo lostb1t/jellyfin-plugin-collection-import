@@ -41,49 +41,49 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 
-namespace Jellyfin.Plugin.MediaList.Api;
+namespace Jellyfin.Plugin.CollectionImport.Api;
 
 /// <summary>
-/// MediaListController.
+/// CollectionImportController.
 /// </summary>
 [ApiController]
 //[Authorize(Policy = "DefaultAuthorization")]
 [Authorize]
-[Route("medialist")]
+[Route("collectionimport")]
 // [Produces(MediaTypeNames.Application.Json)]
-public class MediaListController : ControllerBase
+public class CollectionImportController : ControllerBase
 {
-    private readonly ILogger<MediaListController> _logger;
+    private readonly ILogger<CollectionImportController> _logger;
     private readonly ILoggerFactory _loggerFactory;
     // private readonly IFileSystem _fileSystem;
     private readonly IServerConfigurationManager _config;
     private readonly IUserManager _userManager;
     private readonly ILibraryManager _libraryManager;
-    private readonly MediaListManager _mediaListManager;
+    private readonly CollectionImportManager _collectionImportManager;
     private readonly IDtoService _dtoService;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="MediaListController"/> class.
+    /// Initializes a new instance of the <see cref="CollectionImportController"/> class.
     /// </summary>
-    public MediaListController(
+    public CollectionImportController(
         ILoggerFactory loggerFactory,
         // IFileSystem fileSystem,
         IDtoService dtoService,
         IServerConfigurationManager config,
         IUserManager userManager,
-        MediaListManager mediaListManager,
+        CollectionImportManager collectionImportManager,
         ILibraryManager libraryManager)
     {
         _loggerFactory = loggerFactory;
-        _logger = loggerFactory.CreateLogger<MediaListController>();
+        _logger = loggerFactory.CreateLogger<CollectionImportController>();
         // _fileSystem = fileSystem;
         _dtoService = dtoService;
         _config = config;
         _userManager = userManager;
-        _mediaListManager = mediaListManager;
+        _collectionImportManager = collectionImportManager;
         _libraryManager = libraryManager;
 
-        _logger.LogInformation("MediaListController Loaded");
+        _logger.LogInformation("CollectionImportController Loaded");
     }
 
     // public class Data
@@ -118,7 +118,7 @@ public class MediaListController : ControllerBase
         // var dtoOptions = new DtoOptions { Fields = fields }
         //     .AddClientFields(User);
         //var dtoOptions = null;
-        var boxsets = _mediaListManager.GetBoxSetByIds(collectionIds);
+        var boxsets = _collectionImportManager.GetBoxSetByIds(collectionIds);
         var boxset = boxsets.First();
 
         QueryResult<BaseItem> result;

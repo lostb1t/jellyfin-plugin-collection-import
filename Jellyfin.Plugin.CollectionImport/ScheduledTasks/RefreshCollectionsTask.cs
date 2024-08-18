@@ -6,21 +6,21 @@ using MediaBrowser.Common.Configuration;
 using MediaBrowser.Controller.LiveTv;
 using MediaBrowser.Model.Tasks;
 
-namespace Jellyfin.Plugin.MediaList;
+namespace Jellyfin.Plugin.CollectionImport;
 
 /// <summary>
 /// The "Refresh Guide" scheduled task.
 /// </summary>
-public class MediaListScheduledTask : IScheduledTask, IConfigurableScheduledTask
+public class RefreshCollectionsTask : IScheduledTask, IConfigurableScheduledTask
 {
-    private readonly MediaListManager _mediaListManager;
+    private readonly CollectionImportManager _collectionImportManager;
     private readonly IConfigurationManager _config;
 
-    public MediaListScheduledTask(
-        MediaListManager mediaListManager,
+    public RefreshCollectionsTask(
+        CollectionImportManager collectionImportManager,
         IConfigurationManager config)
     {
-        _mediaListManager = mediaListManager;
+        _collectionImportManager = collectionImportManager;
         _config = config;
     }
 
@@ -47,7 +47,7 @@ public class MediaListScheduledTask : IScheduledTask, IConfigurableScheduledTask
 
     /// <inheritdoc />
     public Task ExecuteAsync(IProgress<double> progress, CancellationToken cancellationToken)
-     => _mediaListManager.Sync(progress, cancellationToken);
+     => _collectionImportManager.Sync(progress, cancellationToken);
        //return Task.CompletedTask;
 
     /// <inheritdoc />
