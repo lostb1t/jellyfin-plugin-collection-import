@@ -1,52 +1,68 @@
 [
     {
-    "guid": "a708187e-5f82-4610-9c84-ec1f2837d5fe",
-    "name": "Collection Import",
-    "overview": "bla bla",
-    "description": "more bla",
-    "owner": "lostb1t",
-    "category": "General",
-    "versions": [
-        {
-            "version": "0.5",
-            "changelog": "Initial Release",
-            "targetAbi": "10.8.10.0",
-            "sourceUrl": "https://github.com/lostb1t/jellyfin-plugin-media-lists/releases/download/0.5/collectionimport.zip",
-            "checksum": "0ea490e4b83684ac2423dae4bb14ce12",
-            "timestamp": "2024-05-12T11:40:00Z"
-        },
-       {
-            "version": "0.4",
-            "changelog": "Initial Release",
-            "targetAbi": "10.8.10.0",
-            "sourceUrl": "https://github.com/lostb1t/jellyfin-plugin-media-lists/releases/download/0.4/collectionimport.zip",
-            "checksum": "b899d89641ceb39793e0fa255195f291",
-            "timestamp": "2024-05-12T11:40:00Z"
-        },
-        {
-            "version": "0.3",
-            "changelog": "Initial Release",
-            "targetAbi": "10.8.10.0",
-            "sourceUrl": "https://github.com/lostb1t/jellyfin-plugin-media-lists/releases/download/0.3/collectionimport.zip",
-            "checksum": "b27fc3d075ca8ec578b8cbbd307a9ada",
-            "timestamp": "2024-05-12T11:40:00Z"
-        },
-        {
-            "version": "0.2",
-            "changelog": "Initial Release",
-            "targetAbi": "10.8.10.0",
-            "sourceUrl": "https://github.com/lostb1t/jellyfin-plugin-media-lists/releases/download/0.2/collectionimport.zip",
-            "checksum": "40818413b93dbae366520f5c1daa9d2e",
-            "timestamp": "2024-05-12T11:40:00Z"
-        },
-        {
-            "version": "0.1",
-            "changelog": "Initial Release",
-            "targetAbi": "10.8.10.0",
-            "sourceUrl": "https://github.com/lostb1t/jellyfin-plugin-media-lists/releases/download/0.1/collectionimport-0.1.zip",
-            "checksum": "f82d574397c3c64ae163b38f7aa0d229",
-            "timestamp": "2024-05-12T11:40:00Z"
-        }
-    ]
-}
+        "guid": "a708187e-5f82-4610-9c84-ec1f2837d5fe",
+        "name": "Collection Import",
+        "overview": "bla bla",
+        "description": "more bla",
+        "owner": "lostb1t",
+        "category": "General",
+        "versions": [
+            {
+                "version": "0.9",
+                "changelog": "- See the full changelog at [GitHub](https://github.com/lostb1t/jellyfin-plugin-collection-import/releases/tag/0.9)\n",
+                "targetAbi": "10.9.9.0",
+                "sourceUrl": "https://github.com/lostb1t/jellyfin-plugin-collection-import/releases/download/0.9/collection-import-0.9.zip",
+                "checksum": "13f00a07fb4081aa8e63d4ed2f4f1e8d",
+                "timestamp": "2024-08-18T12:30:04Z"
+            },
+            {
+                "version": "0.8",
+                "changelog": "- See the full changelog at [GitHub](https://github.com/lostb1t/jellyfin-plugin-collection-import/releases/tag/0.8)\n",
+                "targetAbi": "10.9.9.0",
+                "sourceUrl": "https://github.com/lostb1t/jellyfin-plugin-collection-import/releases/download/0.8/collection-import-0.8.zip",
+                "checksum": "f9fd85c8e29824af4894223d36c031ff",
+                "timestamp": "2024-08-18T12:27:51Z"
+            },
+            {
+                "version": "0.5",
+                "changelog": "Initial Release",
+                "targetAbi": "10.8.10.0",
+                "sourceUrl": "https://github.com/lostb1t/jellyfin-plugin-collection-import/releases/download/0.5/collectionimport.zip",
+                "checksum": "0ea490e4b83684ac2423dae4bb14ce12",
+                "timestamp": "2024-05-12T11:40:00Z"
+            },
+            {
+                "version": "0.4",
+                "changelog": "Initial Release",
+                "targetAbi": "10.8.10.0",
+                "sourceUrl": "https://github.com/lostb1t/jellyfin-plugin-collection-import/releases/download/0.4/collectionimport.zip",
+                "checksum": "b899d89641ceb39793e0fa255195f291",
+                "timestamp": "2024-05-12T11:40:00Z"
+            },
+            {
+                "version": "0.3",
+                "changelog": "Initial Release",
+                "targetAbi": "10.8.10.0",
+                "sourceUrl": "https://github.com/lostb1t/jellyfin-plugin-collection-import/releases/download/0.3/collectionimport.zip",
+                "checksum": "b27fc3d075ca8ec578b8cbbd307a9ada",
+                "timestamp": "2024-05-12T11:40:00Z"
+            },
+            {
+                "version": "0.2",
+                "changelog": "Initial Release",
+                "targetAbi": "10.8.10.0",
+                "sourceUrl": "https://github.com/lostb1t/jellyfin-plugin-collection-import/releases/download/0.2/collectionimport.zip",
+                "checksum": "40818413b93dbae366520f5c1daa9d2e",
+                "timestamp": "2024-05-12T11:40:00Z"
+            },
+            {
+                "version": "0.1",
+                "changelog": "Initial Release",
+                "targetAbi": "10.8.10.0",
+                "sourceUrl": "https://github.com/lostb1t/jellyfin-plugin-collection-import/releases/download/0.1/collectionimport-0.1.zip",
+                "checksum": "f82d574397c3c64ae163b38f7aa0d229",
+                "timestamp": "2024-05-12T11:40:00Z"
+            }
+        ]
+    }
 ]
