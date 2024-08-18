@@ -72,7 +72,7 @@ public class CollectionImportManager
                 Name = set.Name,
                 IsLocked = true
             });
-            collection.Tags = new[] { "collectionimport", "promoted", "sf_promoted" };
+            collection.Tags = new[] { "collectionimport" };
             collection.DisplayOrder = "Default";
             //item.DisplayOrder = "SortName";
             //item.IsPreSorted = true;
