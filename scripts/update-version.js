@@ -1,5 +1,7 @@
 const fs = require('fs');
 
+const VERSION = process.env.VERSION;
+
 // Read csproj
 const csprojPath = './Jellyfin.Plugin.CollectionImport/Jellyfin.Plugin.CollectionImport.csproj';
 if (!fs.existsSync(csprojPath)) {
@@ -21,6 +23,7 @@ if (!fs.existsSync(csprojPath)) {
 
 // Function to increment version string
 function incrementVersion(version) {
+    return VERSION;
     const parts = version.split('.').map(Number);
     parts[parts.length - 1] += 1; // Increment the last part of the version
     return parts.join('.');
@@ -42,7 +45,7 @@ fs.readFile(csprojPath, 'utf8', (err, data) => {
     }).replace(/<FileVersion>(.*?)<\/FileVersion>/, (match, version) => {
         newFileVersion = incrementVersion(version);
         return `<FileVersion>${newFileVersion}</FileVersion>`;
-    });
+    });;
 
     // Write the updated XML back to the .csproj file
     fs.writeFile(csprojPath, updatedData, 'utf8', (err) => {
