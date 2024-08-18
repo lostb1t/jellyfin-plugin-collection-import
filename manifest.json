@@ -2,8 +2,8 @@
     {
         "guid": "a708187e-5f82-4610-9c84-ec1f2837d5fe",
         "name": "Collection Import",
-        "overview": "bla bla",
-        "description": "more bla",
+        "overview": "Import collections from external sources like tmdblist",
+        "description": "Import collections from external sources like tmdblist",
         "owner": "lostb1t",
         "category": "General",
         "versions": [
