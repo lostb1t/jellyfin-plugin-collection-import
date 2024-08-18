@@ -25,7 +25,7 @@ public class RefreshCollectionsTask : IScheduledTask, IConfigurableScheduledTask
     }
 
     /// <inheritdoc />
-    public string Name => "Super collections";
+    public string Name => "Import Collections";
 
     /// <inheritdoc />
     public string Description => "";
