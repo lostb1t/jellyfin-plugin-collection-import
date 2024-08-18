@@ -1,4 +1,5 @@
-export VERSION := 11.0
+# must be x.y where y cannot be higher then 9
+export VERSION := 13.0
 export GITHUB_REPO := lostb1t/jellyfin-plugin-collection-import
 export FILE := collection-import-${VERSION}.zip
 
