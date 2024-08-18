@@ -11,7 +11,7 @@
             "version": "0.5",
             "changelog": "Initial Release",
             "targetAbi": "10.8.10.0",
-            "sourceUrl": "https://github.com/lostb1t/jellyfin-plugin-media-lists/releases/download/0.4/collectionimport.zip",
+            "sourceUrl": "https://github.com/lostb1t/jellyfin-plugin-media-lists/releases/download/0.5/collectionimport.zip",
             "checksum": "0ea490e4b83684ac2423dae4bb14ce12",
             "timestamp": "2024-05-12T11:40:00Z"
         },
