@@ -14,6 +14,7 @@ namespace Jellyfin.Plugin.MediaList
         {
            serviceCollection.AddSingleton<MediaListManager>();
            serviceCollection.AddSingleton<MdbClientManager>();
+           //serviceCollection.AddScoped<IEnumerableInterleave>();
         }
     }
 }

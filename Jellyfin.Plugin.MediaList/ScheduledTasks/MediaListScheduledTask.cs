@@ -47,7 +47,7 @@ public class MediaListScheduledTask : IScheduledTask, IConfigurableScheduledTask
 
     /// <inheritdoc />
     public Task ExecuteAsync(IProgress<double> progress, CancellationToken cancellationToken)
-     => _mediaListManager.Sync(cancellationToken);
+     => _mediaListManager.Sync(progress, cancellationToken);
        //return Task.CompletedTask;
 
     /// <inheritdoc />

@@ -24,6 +24,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Hosting;
 using Jellyfin.Data.Entities;
 using Jellyfin.Plugin.MediaList.Configuration;
+using System.Security.Cryptography.X509Certificates;
 
 namespace Jellyfin.Plugin.MediaList;
 
@@ -55,90 +56,133 @@ public class MediaListManager
         _mdbClientManager = mdbClientManager;
     }
 
-    public async Task SyncCollection(ImportSet collection, IEnumerable<BaseItem> dbItems, CancellationToken cancellationToken)
+    public async Task SyncCollection(ImportSet set, IEnumerable<BaseItem> dbItems, CancellationToken cancellationToken)
     {
-        _logger.LogInformation("Syncing {Name}.", collection.Name);
-        if (collection.Urls.Length == 0) {
-          return;
-        }
-        var item = GetBoxSetByName(collection.Name);
-        if (item is null)
+        _logger.LogInformation("Syncing {Name}.", set.Name);
+        if (set.Urls.Length == 0)
         {
-            _logger.LogInformation("{Name} not found, creating.", collection.Name);
-            item = await _collectionManager.CreateCollectionAsync(new CollectionCreationOptions
+            return;
+        }
+        var collection = GetBoxSetByName(set.Name);
+        if (collection is null)
+        {
+            _logger.LogInformation("{Name} not found, creating.", set.Name);
+            collection = await _collectionManager.CreateCollectionAsync(new CollectionCreationOptions
             {
-                Name = collection.Name,
+                Name = set.Name,
                 IsLocked = true
             });
-            item.Tags = new[] { "medialist", "promoted" };
-            item.DisplayOrder = "Default";
+            collection.Tags = new[] { "medialist", "promoted", "sf_promoted" };
+            collection.DisplayOrder = "Default";
             //item.DisplayOrder = "SortName";
             //item.IsPreSorted = true;
-            item.OnMetadataChanged();
-            await item.UpdateToRepositoryAsync(ItemUpdateType.MetadataEdit, CancellationToken.None).ConfigureAwait(false);
+            collection.OnMetadataChanged();
+            await collection.UpdateToRepositoryAsync(ItemUpdateType.MetadataEdit, CancellationToken.None).ConfigureAwait(false);
         }
-        else
+
+        //Console.WriteLine(test);
+        var collectionItems = GetBoxSetChildren(collection.Id);
+
+        //var idSets = Array.Empty<string>();
+        //IEnumerable<IEnumerable<Guid>> idSets = new IEnumerable<Guid>[] { };
+        IEnumerable<IEnumerable<Guid>> idSets = Array.Empty<IEnumerable<Guid>>();
+
+        foreach (string url in set.Urls)
         {
-            // clear it
-            //item.c
-        }
-        var item_ids = new List<string>();
-        foreach (string url in collection.Urls)
-        {
-            var items = await _mdbClientManager.Request(url.TrimEnd(new Char[] { '/' } ) + "/json");
-            
+            //if (url.StartsWith("https://mdblist.com") || url.StartsWith("http://mdblist.com")) {
+            var items = await _mdbClientManager.Request(url.TrimEnd(new Char[] { '/' }) + "/json");
+            var providerIds = new List<string>();
+            //var provider_ids = Dictionary<string, string>;
+            //Dictionary<string, string> providerIds = new Dictionary<string, string>();
+            //var providerIds = new List<Tuple<string, string>>();
+
             foreach (MdbItem i in items)
             {
                 //Console.WriteLine(i.title);
                 if (i.Imdb_id is not null)
                 {
-                    item_ids.Add(i.Imdb_id);
+                    providerIds.Add(i.Imdb_id);
+                    //providerIds.Add("imdb", i.Imdb_id);
                 }
             }
-        }
-        //var localItems = new List<BaseItem>;
+            //Console.WriteLine($"providerIds for {url} ----- ");
+            //providerIds.ToList().ForEach(x => Console.WriteLine(x.ToString()));
+            // var ldbItems = _itemRepo.GetItemList(new InternalItemsQuery
+            // {
+            //     HasAnyProviderId = providerIds
+            // });
 #pragma warning disable CS8604 // Possible null reference argument.
-        var LocalItems = dbItems
-          .Where(i => item_ids.Contains(i.GetProviderId(MetadataProvider.Imdb)))
-          .OrderBy(i => item_ids.IndexOf(i.GetProviderId(MetadataProvider.Imdb)));
-        //var LocalItems = dbItems.Where(i => item_ids.Contains(i.GetProviderId(MetadataProvider.Imdb)));
+            var LocalItems = dbItems
+                .Where(i => providerIds.Contains(i.GetProviderId(MetadataProvider.Imdb)))
+                .OrderBy(i => providerIds.IndexOf(i.GetProviderId(MetadataProvider.Imdb)));
 #pragma warning restore CS8604 // Possible null reference argument.
+            idSets = idSets.Append(LocalItems.Select(c => c.Id).ToList());
+
+
+            //#pragma warning disable CS8604 // Possible null reference argument.
+            //var LocalItems = dbItems
+            //  .Where(i => itemIds.Contains(i.GetProviderId(MetadataProvider.Imdb)))
+            //  .OrderBy(i => itemIds.IndexOf(i.GetProviderId(MetadataProvider.Imdb)));
+            //#pragma warning restore CS8604 // Possible null reference argument.
+
+        }
+        //Console.WriteLine(ObjectDumper.Dump(idSets));
+        var ids = Interleave(idSets);
+        //Console.WriteLine("guids  ----- ");
+        //ids.ToList().ForEach(x => Console.WriteLine(x.ToString()));
+        //Console.WriteLine(ObjectDumper.Dump(ids));
+        //));
+        //var localItems = new List<BaseItem>;
         // });
 
         //item.GetProviderId(MetadataProvider.Imdb)
         //Console.WriteLine(LocalItems);
 
         //GetItemIdsList(InternalItemsQuery query);
-        await _collectionManager.AddToCollectionAsync(item.Id, LocalItems.Select(i => i.Id));
+
+        // we need to clear it first, otherwise sorting is not applied.
+        await _collectionManager.RemoveFromCollectionAsync(collection.Id, collectionItems.Select(i => i.Id));
+        await _collectionManager.AddToCollectionAsync(collection.Id, ids);
+        collection.OnMetadataChanged();
+
+        // remove old items
+        //item.GetChildren
+        //await _collectionManager.AddToCollectionAsync(collection.Id, collectionItems.Where(c => ids.Contains(c.Id)).Select(c => c.Id).ToList());
+        //collection.OnMetadataChanged();
     }
 
-    public async Task Sync(CancellationToken cancellationToken)
+    public async Task Sync(IProgress<double> progress, CancellationToken cancellationToken)
     {
         _logger.LogInformation("Refreshing collections");
         //var items = await _mdbClientManager.Request("https://mdblist.com/lists/adamosborne01/trending-shows1/json");
         var collections = MediaListPlugin.Instance!.Configuration.ImportSets;
-        
-    //    var grouped = lists.Where(p => !String.IsNullOrEmpty(p.Url) && !String.IsNullOrEmpty(p.Name)).GroupBy(
-   // p => p.Name, 
-   // p => p.Url!,
-   // (key, g) => new { Name = key!, Urls = g.ToList() }).ToList();
-   //     grouped.ForEach(book => Console.WriteLine(book));
-        
+
+        //    var grouped = lists.Where(p => !String.IsNullOrEmpty(p.Url) && !String.IsNullOrEmpty(p.Name)).GroupBy(
+        // p => p.Name, 
+        // p => p.Url!,
+        // (key, g) => new { Name = key!, Urls = g.ToList() }).ToList();
+        //     grouped.ForEach(book => Console.WriteLine(book));
+
 
         // i have no idea howto query for imdbid at this point so so it the slow way for now.
         var dbItems = _itemRepo.GetItemList(new InternalItemsQuery
         {
             HasImdbId = true
         }).Where(i => !string.IsNullOrEmpty(i.GetProviderId(MetadataProvider.Imdb)));
-        
-   var options = new ParallelOptions()
-    {
-        MaxDegreeOfParallelism = 20
-    };
 
-    await Parallel.ForEachAsync(collections, options, async (i, ct) => {
-       await SyncCollection(i, dbItems, ct);
-    });
+        var options = new ParallelOptions()
+        {
+            MaxDegreeOfParallelism = 20
+        };
+
+        //double percent = 100;
+        var done = 0;
+        await Parallel.ForEachAsync(collections, options, async (i, ct) =>
+        {
+            await SyncCollection(i, dbItems, ct);
+            done++;
+            progress.Report(Convert.ToDouble(100 / collections.Length * done));
+        });
         //await grouped.ForEachAsync(async i => await SyncCollection(i.Name, i.Urls, dbItems, cancellationToken));
         //await SyncCollection(
         //    "Trending",
@@ -195,6 +239,15 @@ public class MediaListManager
         }).Select(b => b as BoxSet).FirstOrDefault();
     }
 
+    public ICollection<BaseItem> GetBoxSetChildren(Guid id)
+    {
+        return _libraryManager.GetItemList(new InternalItemsQuery
+        {
+            IncludeItemTypes = new[] { BaseItemKind.Movie, BaseItemKind.Series },
+            ParentId = id,
+        }).ToList();
+    }
+
     public ICollection<BoxSet?> GetBoxSetByIds(Guid[] ids)
     {
         return _libraryManager.GetItemList(new InternalItemsQuery
@@ -216,7 +269,17 @@ public class MediaListManager
             Recursive = true,
         }).Select(b => b as BoxSet).ToList();
     }
-
+    private static IEnumerable<T> Interleave<T>(IEnumerable<IEnumerable<T>> source)
+    {
+        var queues = source.Select(x => new Queue<T>(x)).ToList();
+        while (queues.Any(x => x.Count != 0))
+        {
+            foreach (var queue in queues.Where(x => x.Count != 0))
+            {
+                yield return queue.Dequeue();
+            }
+        }
+    }
     // public List<BaseItem> GetItemsForCollection(BoxSet collection, User, )
     // {
     //     List<BaseItem> children = collection.GetChildren(user, includeLinkedChildren, query);
@@ -229,3 +292,4 @@ public class MediaListManager
     // }
 
 }
+
