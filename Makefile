@@ -1,4 +1,4 @@
-export VERSION := 0.17
+export VERSION := 0.18
 export GITHUB_REPO := lostb1t/jellyfin-plugin-collection-import
 export FILE := collection-import-${VERSION}.zip
 
@@ -18,12 +18,14 @@ create-tag:
 create-gh-release:
 	gh release create ${VERSION} "${FILE}" --generate-notes --verify-tag
 
-update-files:
+update-version:
 	node scripts/update-version.js
+  
+update-manifest:
 	node scripts/validate-and-update-manifest.js
 
 push-manifest:
 	git commit -m 'new release' manifest.json
 	git push origin main
 
-release: build zip create-tag create-gh-release update-files push-manifest
+release: update-version build zip create-tag create-gh-release update-manifest push-manifest
