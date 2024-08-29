@@ -79,6 +79,10 @@ public class CollectionImportManager
             collection.OnMetadataChanged();
             await collection.UpdateToRepositoryAsync(ItemUpdateType.MetadataEdit, CancellationToken.None).ConfigureAwait(false);
         }
+        
+        collection.DisplayOrder = "Default";
+        collection.OnMetadataChanged();
+        await collection.UpdateToRepositoryAsync(ItemUpdateType.MetadataEdit, CancellationToken.None).ConfigureAwait(false);
 
         //Console.WriteLine(test);
         var collectionItems = GetBoxSetChildren(collection.Id);
