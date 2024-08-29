@@ -28,7 +28,7 @@ public class PluginConfiguration : BasePluginConfiguration
                         }
                     },
                 new ImportSet {
-                   Name = "Most Watched This Week:",
+                   Name = "Most Watched This Week",
                    Urls = new [] {
                         "https://mdblist.com/lists/linaspurinis/top-watched-movies-of-the-week",
                         "https://mdblist.com/lists/Lewall90/weekly-most-watched"
