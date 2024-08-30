@@ -37,6 +37,9 @@ public class CollectionImportManager
     private readonly ILibraryManager _libraryManager;
     private readonly MdbClientManager _mdbClientManager;
     private readonly ICollectionManager _collectionManager;
+    private readonly IUserManager _userManager;
+
+    private readonly User _adminUser;
 
     public CollectionImportManager(
         ILogger<CollectionImportManager> logger,
@@ -45,6 +48,7 @@ public class CollectionImportManager
         IItemRepository itemRepo,
         ILibraryManager libraryManager,
         ICollectionManager collectionManager,
+        IUserManager userManager,
         MdbClientManager mdbClientManager)
     {
         _logger = logger;
@@ -53,7 +57,11 @@ public class CollectionImportManager
         _itemRepo = itemRepo;
         _libraryManager = libraryManager;
         _collectionManager = collectionManager;
+        _userManager = userManager;
         _mdbClientManager = mdbClientManager;
+        _adminUser = _userManager.Users
+            .Where(i => i.HasPermission(PermissionKind.IsAdministrator))
+            .First();
     }
 
     public async Task SyncCollection(ImportSet set, IEnumerable<BaseItem> dbItems, CancellationToken cancellationToken)
@@ -74,47 +82,24 @@ public class CollectionImportManager
             });
             collection.Tags = new[] { "collectionimport" };
             collection.DisplayOrder = "Default";
-            //item.DisplayOrder = "SortName";
-            //item.IsPreSorted = true;
-            collection.OnMetadataChanged();
-            await collection.UpdateToRepositoryAsync(ItemUpdateType.MetadataEdit, CancellationToken.None).ConfigureAwait(false);
         }
-        
+
         collection.DisplayOrder = "Default";
-        collection.OnMetadataChanged();
-        await collection.UpdateToRepositoryAsync(ItemUpdateType.MetadataEdit, CancellationToken.None).ConfigureAwait(false);
-
-        //Console.WriteLine(test);
-        var collectionItems = GetBoxSetChildren(collection.Id);
-
-        //var idSets = Array.Empty<string>();
-        //IEnumerable<IEnumerable<Guid>> idSets = new IEnumerable<Guid>[] { };
         IEnumerable<IEnumerable<Guid>> idSets = Array.Empty<IEnumerable<Guid>>();
 
         foreach (string url in set.Urls)
         {
-            //if (url.StartsWith("https://mdblist.com") || url.StartsWith("http://mdblist.com")) {
             var items = await _mdbClientManager.Request(url.TrimEnd(new Char[] { '/' }) + "/json");
             var providerIds = new List<string>();
-            //var provider_ids = Dictionary<string, string>;
-            //Dictionary<string, string> providerIds = new Dictionary<string, string>();
-            //var providerIds = new List<Tuple<string, string>>();
 
             foreach (MdbItem i in items)
             {
-                //Console.WriteLine(i.title);
                 if (i.Imdb_id is not null)
                 {
                     providerIds.Add(i.Imdb_id);
-                    //providerIds.Add("imdb", i.Imdb_id);
                 }
             }
-            //Console.WriteLine($"providerIds for {url} ----- ");
-            //providerIds.ToList().ForEach(x => Console.WriteLine(x.ToString()));
-            // var ldbItems = _itemRepo.GetItemList(new InternalItemsQuery
-            // {
-            //     HasAnyProviderId = providerIds
-            // });
+
 #pragma warning disable CS8604 // Possible null reference argument.
             var LocalItems = dbItems
                 .Where(i => providerIds.Contains(i.GetProviderId(MetadataProvider.Imdb)))
@@ -122,51 +107,22 @@ public class CollectionImportManager
 #pragma warning restore CS8604 // Possible null reference argument.
             idSets = idSets.Append(LocalItems.Select(c => c.Id).ToList());
 
-
-            //#pragma warning disable CS8604 // Possible null reference argument.
-            //var LocalItems = dbItems
-            //  .Where(i => itemIds.Contains(i.GetProviderId(MetadataProvider.Imdb)))
-            //  .OrderBy(i => itemIds.IndexOf(i.GetProviderId(MetadataProvider.Imdb)));
-            //#pragma warning restore CS8604 // Possible null reference argument.
-
         }
-        //Console.WriteLine(ObjectDumper.Dump(idSets));
         var ids = Interleave(idSets);
-        //Console.WriteLine("guids  ----- ");
-        //ids.ToList().ForEach(x => Console.WriteLine(x.ToString()));
-        //Console.WriteLine(ObjectDumper.Dump(ids));
-        //));
-        //var localItems = new List<BaseItem>;
-        // });
-
-        //item.GetProviderId(MetadataProvider.Imdb)
-        //Console.WriteLine(LocalItems);
-
-        //GetItemIdsList(InternalItemsQuery query);
+        var children = collection.GetChildren(_adminUser, true);
 
         // we need to clear it first, otherwise sorting is not applied.
-        await _collectionManager.RemoveFromCollectionAsync(collection.Id, collectionItems.Select(i => i.Id));
+        await _collectionManager.RemoveFromCollectionAsync(collection.Id, children.Select(i => i.Id));
         await _collectionManager.AddToCollectionAsync(collection.Id, ids);
-        collection.OnMetadataChanged();
 
-        // remove old items
-        //item.GetChildren
-        //await _collectionManager.AddToCollectionAsync(collection.Id, collectionItems.Where(c => ids.Contains(c.Id)).Select(c => c.Id).ToList());
-        //collection.OnMetadataChanged();
+        collection.OnMetadataChanged();
+        await collection.UpdateToRepositoryAsync(ItemUpdateType.MetadataEdit, CancellationToken.None).ConfigureAwait(false);
     }
 
     public async Task Sync(IProgress<double> progress, CancellationToken cancellationToken)
     {
         _logger.LogInformation("Refreshing collections");
-        //var items = await _mdbClientManager.Request("https://mdblist.com/lists/adamosborne01/trending-shows1/json");
         var collections = CollectionImportPlugin.Instance!.Configuration.ImportSets;
-
-        //    var grouped = lists.Where(p => !String.IsNullOrEmpty(p.Url) && !String.IsNullOrEmpty(p.Name)).GroupBy(
-        // p => p.Name, 
-        // p => p.Url!,
-        // (key, g) => new { Name = key!, Urls = g.ToList() }).ToList();
-        //     grouped.ForEach(book => Console.WriteLine(book));
-
 
         // i have no idea howto query for imdbid at this point so so it the slow way for now.
         var dbItems = _itemRepo.GetItemList(new InternalItemsQuery
@@ -187,49 +143,7 @@ public class CollectionImportManager
             done++;
             progress.Report(Convert.ToDouble(100 / collections.Length * done));
         });
-        //await grouped.ForEachAsync(async i => await SyncCollection(i.Name, i.Urls, dbItems, cancellationToken));
-        //await SyncCollection(
-        //    "Trending",
-        //    new List<string>
-        //        { " https://mdblist.com/lists/adamosborne01/hmmmmmmmm/json",
-        //        "https://mdblist.com/lists/adamosborne01/trending-shows1/json"
-        //        }
-        //, dbItems, cancellationToken);
-
-        //AddToCollectionAsync
-        //CreateCollectionAsync
-
-        //var collections = GetAllBoxSetsFromLibrary();
-        // var collections = _collectionManager.GetCollections(null).ToList();
-        // var trendingBoxSet = GetBoxSet("Trending");
-        // if (trendingBoxSet is null) {
-        //     trendingBoxSet = await _collectionManager.CreateCollectionAsync(new CollectionCreationOptions 
-        //     {
-        //         Name = "Trending",
-        //     });
-        // }
-
-        // Console.WriteLine(trendingBoxSet.Name);
-        // foreach (BoxSet a in collections.OfType<BoxSet>())
-        // {
-        //     Console.WriteLine(a.Name);
-
-        //     //await AddMoviesToCollection(movieCollection.Where(m => string.IsNullOrEmpty(m.PrimaryVersionId)).ToList(), tmdbCollectionId, boxSet).ConfigureAwait(false);
-
-
-        // }
-
-        //return true;
     }
-
-    // private List<CollectionFolder?> GetCollectionsFromLibrary()
-    // {
-    //     return _libraryManager.GetItemList(new InternalItemsQuery
-    //     {
-    //         IncludeItemTypes = new[] { BaseItemKind.CollectionFolder },
-    //         Recursive = true,
-    //     }).Select(b => b as CollectionFolder).Where(i => i is not null).ToList();
-    // }
 
     public BoxSet? GetBoxSetByName(string name)
     {
@@ -241,15 +155,6 @@ public class CollectionImportManager
             Tags = new[] { "collectionimport" },
             Name = name,
         }).Select(b => b as BoxSet).FirstOrDefault();
-    }
-
-    public ICollection<BaseItem> GetBoxSetChildren(Guid id)
-    {
-        return _libraryManager.GetItemList(new InternalItemsQuery
-        {
-            IncludeItemTypes = new[] { BaseItemKind.Movie, BaseItemKind.Series },
-            ParentId = id,
-        }).ToList();
     }
 
     public ICollection<BoxSet?> GetBoxSetByIds(Guid[] ids)
@@ -284,16 +189,5 @@ public class CollectionImportManager
             }
         }
     }
-    // public List<BaseItem> GetItemsForCollection(BoxSet collection, User, )
-    // {
-    //     List<BaseItem> children = collection.GetChildren(user, includeLinkedChildren, query);
-    //     // return _libraryManager.GetItemList(new InternalItemsQuery
-    //     // {
-    //     //     IncludeItemTypes = new[] { BaseItemKind.BoxSet },
-    //     //     CollapseBoxSetItems = false,
-    //     //     Recursive = true,
-    //     // }).Select(b => b as BoxSet).ToList();
-    // }
-
 }
 
