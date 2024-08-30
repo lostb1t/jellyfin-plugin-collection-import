@@ -109,7 +109,7 @@ public class CollectionImportManager
 
         }
         var ids = Interleave(idSets);
-        var children = collection.GetChildren(_adminUser, true);
+        var children = collection.GetChildren(_adminUser, false);
 
         // we need to clear it first, otherwise sorting is not applied.
         await _collectionManager.RemoveFromCollectionAsync(collection.Id, children.Select(i => i.Id));
