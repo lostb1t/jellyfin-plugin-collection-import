@@ -104,8 +104,8 @@ public class CollectionImportManager
             var LocalItems = dbItems
                 .Where(i => providerIds.Contains(i.GetProviderId(MetadataProvider.Imdb)))
                 .OrderBy(i => providerIds.IndexOf(i.GetProviderId(MetadataProvider.Imdb)));
+            idSets = idSets.Append(LocalItems.GroupBy(i => providerIds.IndexOf(i.GetProviderId(MetadataProvider.Imdb))).Select(group=>group.First().Id).ToList());
 #pragma warning restore CS8604 // Possible null reference argument.
-            idSets = idSets.Append(LocalItems.Select(c => c.Id).ToList());
 
         }
         var ids = Interleave(idSets);
