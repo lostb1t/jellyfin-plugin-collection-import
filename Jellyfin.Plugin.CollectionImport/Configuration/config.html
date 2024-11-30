@@ -74,9 +74,7 @@
                 template.querySelector("[data-id=txtRepositoryName]").value = set.Name || "";
                 
                 for (let i = 0; i < set.Urls.length; i++) {
-                    //console.log(el);
                     CollectionImport.addUrl(template, set.Urls[i]);
-                    //templateList.
                 }
                 const el = CollectionImport.configurationWrapper.appendChild(template);
             },
@@ -97,7 +95,6 @@
                 setEl.querySelector("#urlContainer").appendChild(template);
             },
             rmSet: function (setEl) {
-                console.log(setEl);
                 setEl.remove();
                 const configs = document.querySelectorAll("[data-id=repo-config]");
                 console.log(configs.lenght);
@@ -111,8 +108,6 @@
 
                 const configs = document.querySelectorAll("[data-id=repo-config]");
                 for (let i = 0; i < configs.length; i++) {
-                    //for (let i = 0; i < configs.length; i++) {
-                    console.log(configs[i]);
                     const repo = {
                         Name: configs[i].querySelector("[data-id=txtRepositoryName]").value,
                         Urls: []
@@ -131,8 +126,6 @@
                         }
                     }
 
-                    console.log(repo);
-
                     config.ImportSets.push(repo);
                 }
 
@@ -149,7 +142,7 @@
                 Dashboard.showLoadingMsg();
                 window.ApiClient.getPluginConfiguration(CollectionImport.pluginId)
                     .then(function (config) {
-                        //console.log(config);
+                        CollectionImport.configurationWrapper.innerHTML = "";
                         for (let i = 0; i < config.ImportSets.length; i++) {
                             CollectionImport.addSet(config.ImportSets[i]);
                         }
@@ -162,7 +155,6 @@
                     });
             },
             init: function () {
-                console.log("init");
                 CollectionImport.btnAddSet.addEventListener("click", CollectionImport.addSetNew);
                 CollectionImport.btnSave.addEventListener("click", CollectionImport.saveConfig);
                 CollectionImport.configurationWrapper.addEventListener("click", (event) => {
