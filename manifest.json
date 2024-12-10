@@ -8,6 +8,14 @@
         "category": "General",
         "versions": [
             {
+                "version": "0.31.0.0",
+                "changelog": "- See the full changelog at [GitHub](https://github.com/lostb1t/jellyfin-plugin-collection-import/releases/tag/0.31.0.0)\n",
+                "targetAbi": "10.9.9.0",
+                "sourceUrl": "https://github.com/lostb1t/jellyfin-plugin-collection-import/releases/download/0.31.0.0/collection-import-0.31.0.0.zip",
+                "checksum": "e2558e1656e4a41091edad21175bc093",
+                "timestamp": "2024-12-10T22:10:56Z"
+            },
+            {
                 "version": "0.30.0.0",
                 "changelog": "- See the full changelog at [GitHub](https://github.com/lostb1t/jellyfin-plugin-collection-import/releases/tag/0.30.0.0)\n",
                 "targetAbi": "10.9.9.0",
