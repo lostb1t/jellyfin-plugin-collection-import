@@ -66,7 +66,7 @@ public class CollectionImportManager
 
     public async Task SyncCollection(ImportSet set, IEnumerable<BaseItem> dbItems, CancellationToken cancellationToken)
     {
-        _logger.LogInformation("Syncing {Name}.", set.Name);
+        _logger.LogInformation("Syncing {Name}", set.Name);
         if (set.Urls.Length == 0)
         {
             return;
@@ -109,14 +109,12 @@ public class CollectionImportManager
 
         }
         var ids = Interleave(idSets);
-        var children = collection.GetChildren(_adminUser, false);
 
         // we need to clear it first, otherwise sorting is not applied.
-        await _collectionManager.RemoveFromCollectionAsync(collection.Id, children.Select(i => i.Id));
-        await _collectionManager.AddToCollectionAsync(collection.Id, ids);
+        var children = collection.GetChildren(_adminUser, true);
+        await _collectionManager.RemoveFromCollectionAsync(collection.Id, children.Select(i => i.Id)).ConfigureAwait(true);
 
-        collection.OnMetadataChanged();
-        await collection.UpdateToRepositoryAsync(ItemUpdateType.MetadataEdit, CancellationToken.None).ConfigureAwait(false);
+        await _collectionManager.AddToCollectionAsync(collection.Id, ids).ConfigureAwait(true);
     }
 
     public async Task Sync(IProgress<double> progress, CancellationToken cancellationToken)
