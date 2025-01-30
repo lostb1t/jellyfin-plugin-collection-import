@@ -25,6 +25,8 @@ using Microsoft.Extensions.Hosting;
 using Jellyfin.Data.Entities;
 using Jellyfin.Plugin.CollectionImport.Configuration;
 using System.Security.Cryptography.X509Certificates;
+using MediaBrowser.Controller.Playlists;
+using MediaBrowser.Model.Playlists;
 
 namespace Jellyfin.Plugin.CollectionImport;
 
@@ -37,6 +39,7 @@ public class CollectionImportManager
     private readonly ILibraryManager _libraryManager;
     private readonly MdbClientManager _mdbClientManager;
     private readonly ICollectionManager _collectionManager;
+    private readonly IPlaylistManager _playlistManager;
     private readonly IUserManager _userManager;
 
     private readonly User _adminUser;
@@ -48,6 +51,7 @@ public class CollectionImportManager
         IItemRepository itemRepo,
         ILibraryManager libraryManager,
         ICollectionManager collectionManager,
+        IPlaylistManager playlistManager,
         IUserManager userManager,
         MdbClientManager mdbClientManager)
     {
@@ -57,6 +61,7 @@ public class CollectionImportManager
         _itemRepo = itemRepo;
         _libraryManager = libraryManager;
         _collectionManager = collectionManager;
+        _playlistManager = playlistManager;
         _userManager = userManager;
         _mdbClientManager = mdbClientManager;
         _adminUser = _userManager.Users
@@ -123,9 +128,44 @@ public class CollectionImportManager
         await _collectionManager.AddToCollectionAsync(collection.Id, ids).ConfigureAwait(true);
     }
 
+    public async Task SyncPlaylist(ImportSet set, IEnumerable<BaseItem> dbItems, CancellationToken cancellationToken)
+    {
+        _logger.LogInformation("Syncing {Name}", set.Name);
+        if (set.Urls.Length == 0)
+        {
+            return;
+        }
+        var playlist = GetPlaylistByName(set.Name);
+        if (playlist is null)
+        {
+            _logger.LogInformation("{Name} not found, creating.", set.Name);
+
+            var playlistId = (await _playlistManager.CreatePlaylist(new PlaylistCreationRequest
+            {
+                Name = set.Name,
+                Public = true
+            })).Id;
+
+            if (Guid.TryParse(playlistId, out Guid playlistGuid))
+            {
+                playlist = _playlistManager.GetPlaylistForUser(playlistGuid, _adminUser.Id);
+                playlist.Tags = new[] { "collectionimport" };
+            }
+        }
+
+        var ids = await GetItemIdsFromMdb(set, dbItems);
+
+        // we need to clear it first, otherwise sorting is not applied.
+        var children = playlist.GetChildren(_adminUser, true);
+        await _playlistManager.RemoveItemFromPlaylistAsync(playlist.Id.ToString(), children.Select(i => i.Id.ToString())).ConfigureAwait(true);
+
+        await _playlistManager.AddItemToPlaylistAsync(playlist.Id, ids.ToList(), _adminUser.Id).ConfigureAwait(true);
+    }
+
     public async Task Sync(IProgress<double> progress, CancellationToken cancellationToken)
     {
-        _logger.LogInformation("Refreshing collections");
+        var usePlaylistsOverCollections = CollectionImportPlugin.Instance!.Configuration.UsePlaylistsOverCollections;
+        _logger.LogInformation($"Refreshing {(usePlaylistsOverCollections ? "playlists" : "collections")}");
         var collections = CollectionImportPlugin.Instance!.Configuration.ImportSets;
 
         // i have no idea howto query for imdbid at this point so so it the slow way for now.
@@ -143,7 +183,14 @@ public class CollectionImportManager
         var done = 0;
         await Parallel.ForEachAsync(collections, options, async (i, ct) =>
         {
-            await SyncCollection(i, dbItems, ct);
+            if (usePlaylistsOverCollections)
+            {
+                await SyncPlaylist(i, dbItems, ct);
+            }
+            else
+            {
+                await SyncCollection(i, dbItems, ct);
+            }
             done++;
             progress.Report(Convert.ToDouble(100 / collections.Length * done));
         });
@@ -159,6 +206,18 @@ public class CollectionImportManager
             Tags = new[] { "collectionimport" },
             Name = name,
         }).Select(b => b as BoxSet).FirstOrDefault();
+    }
+    
+    public Playlist? GetPlaylistByName(string name)
+    {
+        return _libraryManager.GetItemList(new InternalItemsQuery
+        {
+            IncludeItemTypes = new[] { BaseItemKind.Playlist },
+            CollapseBoxSetItems = false,
+            Recursive = true,
+            Tags = new[] { "collectionimport" },
+            Name = name,
+        }).Select(b => b as Playlist).FirstOrDefault();
     }
 
     public ICollection<BoxSet?> GetBoxSetByIds(Guid[] ids)
