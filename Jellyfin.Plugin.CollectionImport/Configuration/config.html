@@ -21,6 +21,12 @@
 
         <form class="artworkConfigurationForm">
             <div id="configurationWrapper"></div>
+            <span>Collection Type: </span>
+            <select is="emby-select" class="emby-select-withcolor emby-select" id="collectTypeSelect">
+                <option value="0">Collection</option>
+                <option value="1">Playlist</option>
+            </select>
+            <br />
             <button id="btnAddRepo" is="emby-button" type="button" class="raised button block">
                 <span>Add new Collection</span>
             </button>
@@ -103,7 +109,8 @@
                 e.preventDefault();
                 Dashboard.showLoadingMsg();
                 const config = {
-                    ImportSets: []
+                    ImportSets: [],
+                    UsePlaylistsOverCollections: document.getElementById("collectTypeSelect").value === '1'
                 };
 
                 const configs = document.querySelectorAll("[data-id=repo-config]");
@@ -146,6 +153,7 @@
                         for (let i = 0; i < config.ImportSets.length; i++) {
                             CollectionImport.addSet(config.ImportSets[i]);
                         }
+                        document.getElementById("collectTypeSelect").value = config.UsePlaylistsOverCollections ? "1" : "0";
                     })
                     .catch(function (error) {
                         console.error(error);
