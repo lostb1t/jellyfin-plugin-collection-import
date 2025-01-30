@@ -214,14 +214,8 @@ public class CollectionImportManager
     
     public Playlist? GetPlaylistByName(string name)
     {
-        return _libraryManager.GetItemList(new InternalItemsQuery
-        {
-            IncludeItemTypes = new[] { BaseItemKind.Playlist },
-            CollapseBoxSetItems = false,
-            Recursive = true,
-            Tags = new[] { "collectionimport" },
-            Name = name,
-        }).Select(b => b as Playlist).FirstOrDefault();
+        return _playlistManager.GetPlaylists(_adminUser.Id)
+            .FirstOrDefault(p => p.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
     }
 
     public ICollection<BoxSet?> GetBoxSetByIds(Guid[] ids)
