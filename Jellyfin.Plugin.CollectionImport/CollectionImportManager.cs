@@ -156,16 +156,19 @@ public class CollectionImportManager
         var ids = await GetItemIdsFromMdb(set, dbItems);
 
         // we need to clear it first, otherwise sorting is not applied.
-        var children = playlist.GetChildren(_adminUser, true);
-        await _playlistManager.RemoveItemFromPlaylistAsync(playlist.Id.ToString(), children.Select(i => i.Id.ToString())).ConfigureAwait(true);
+        if (playlist is not null)
+        {
+            var children = playlist.GetChildren(_adminUser, true);
+            await _playlistManager.RemoveItemFromPlaylistAsync(playlist.Id.ToString(), children.Select(i => i.Id.ToString())).ConfigureAwait(true);
 
-        await _playlistManager.AddItemToPlaylistAsync(playlist.Id, ids.ToList(), _adminUser.Id).ConfigureAwait(true);
+            await _playlistManager.AddItemToPlaylistAsync(playlist.Id, ids.ToList(), _adminUser.Id).ConfigureAwait(true);
+        }
     }
 
     public async Task Sync(IProgress<double> progress, CancellationToken cancellationToken)
     {
         var usePlaylistsOverCollections = CollectionImportPlugin.Instance!.Configuration.UsePlaylistsOverCollections;
-        _logger.LogInformation($"Refreshing {(usePlaylistsOverCollections ? "playlists" : "collections")}");
+        _logger.LogInformation("Refreshing {0}", usePlaylistsOverCollections ? "playlists" : "collections");
         var collections = CollectionImportPlugin.Instance!.Configuration.ImportSets;
 
         // i have no idea howto query for imdbid at this point so so it the slow way for now.
