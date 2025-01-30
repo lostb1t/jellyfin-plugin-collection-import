@@ -64,27 +64,8 @@ public class CollectionImportManager
             .First();
     }
 
-    public async Task SyncCollection(ImportSet set, IEnumerable<BaseItem> dbItems, CancellationToken cancellationToken)
+    private async Task<IEnumerable<Guid>> GetItemIdsFromMdb(ImportSet set, IEnumerable<BaseItem> dbItems)
     {
-        _logger.LogInformation("Syncing {Name}", set.Name);
-        if (set.Urls.Length == 0)
-        {
-            return;
-        }
-        var collection = GetBoxSetByName(set.Name);
-        if (collection is null)
-        {
-            _logger.LogInformation("{Name} not found, creating.", set.Name);
-            collection = await _collectionManager.CreateCollectionAsync(new CollectionCreationOptions
-            {
-                Name = set.Name,
-                IsLocked = true
-            });
-            collection.Tags = new[] { "collectionimport" };
-            collection.DisplayOrder = "Default";
-        }
-
-        collection.DisplayOrder = "Default";
         IEnumerable<IEnumerable<Guid>> idSets = Array.Empty<IEnumerable<Guid>>();
 
         foreach (string url in set.Urls)
@@ -108,7 +89,32 @@ public class CollectionImportManager
 #pragma warning restore CS8604 // Possible null reference argument.
 
         }
-        var ids = Interleave(idSets);
+        return Interleave(idSets);
+    }
+    
+    public async Task SyncCollection(ImportSet set, IEnumerable<BaseItem> dbItems, CancellationToken cancellationToken)
+    {
+        _logger.LogInformation("Syncing {Name}", set.Name);
+        if (set.Urls.Length == 0)
+        {
+            return;
+        }
+        var collection = GetBoxSetByName(set.Name);
+        if (collection is null)
+        {
+            _logger.LogInformation("{Name} not found, creating.", set.Name);
+            collection = await _collectionManager.CreateCollectionAsync(new CollectionCreationOptions
+            {
+                Name = set.Name,
+                IsLocked = true
+            });
+            collection.Tags = new[] { "collectionimport" };
+            collection.DisplayOrder = "Default";
+        }
+
+        collection.DisplayOrder = "Default";
+        
+        var ids = await GetItemIdsFromMdb(set, dbItems);
 
         // we need to clear it first, otherwise sorting is not applied.
         var children = collection.GetChildren(_adminUser, true);
