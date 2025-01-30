@@ -143,7 +143,8 @@ public class CollectionImportManager
             var playlistId = (await _playlistManager.CreatePlaylist(new PlaylistCreationRequest
             {
                 Name = set.Name,
-                Public = true
+                Public = true,
+                UserId = _adminUser.Id
             })).Id;
 
             if (Guid.TryParse(playlistId, out Guid playlistGuid))
