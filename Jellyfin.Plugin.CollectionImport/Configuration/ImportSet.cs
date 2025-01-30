@@ -21,4 +21,7 @@ public class ImportSet
   [Required]
   [SuppressMessage(category: "Performance", checkId: "CA1819", Target = "ArtworkRepos", Justification = "Xml Serializer doesn't support IReadOnlyList")]
   public string[] Urls { get; set; }
+  
+  [Required]
+  public bool UsePlaylistsOverCollections { get; set; } = false;
 }

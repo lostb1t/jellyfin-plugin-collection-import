@@ -40,8 +40,6 @@ public class PluginConfiguration : BasePluginConfiguration
     [SuppressMessage(category: "Performance", checkId: "CA1819", Target = "ArtworkRepos", Justification = "Xml Serializer doesn't support IReadOnlyList")]
     public ImportSet[] ImportSets { get; set; }
 
-    public bool UsePlaylistsOverCollections { get; set; } = false;
-
     // public ImportSet[] ImportSets { 
     // get;
     // set

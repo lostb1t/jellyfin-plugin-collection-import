@@ -168,8 +168,7 @@ public class CollectionImportManager
 
     public async Task Sync(IProgress<double> progress, CancellationToken cancellationToken)
     {
-        var usePlaylistsOverCollections = CollectionImportPlugin.Instance!.Configuration.UsePlaylistsOverCollections;
-        _logger.LogInformation("Refreshing {0}", usePlaylistsOverCollections ? "playlists" : "collections");
+        _logger.LogInformation("Refreshing lists");
         var collections = CollectionImportPlugin.Instance!.Configuration.ImportSets;
 
         // i have no idea howto query for imdbid at this point so so it the slow way for now.
@@ -187,7 +186,7 @@ public class CollectionImportManager
         var done = 0;
         await Parallel.ForEachAsync(collections, options, async (i, ct) =>
         {
-            if (usePlaylistsOverCollections)
+            if (i.UsePlaylistsOverCollections)
             {
                 await SyncPlaylist(i, dbItems, ct);
             }

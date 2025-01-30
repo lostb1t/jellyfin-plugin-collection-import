@@ -21,12 +21,6 @@
 
         <form class="artworkConfigurationForm">
             <div id="configurationWrapper"></div>
-            <span>Collection Type: </span>
-            <select is="emby-select" class="emby-select-withcolor emby-select" id="collectTypeSelect">
-                <option value="0">Collection</option>
-                <option value="1">Playlist</option>
-            </select>
-            <br />
             <button id="btnAddRepo" is="emby-button" type="button" class="raised button block">
                 <span>Add new Collection</span>
             </button>
@@ -43,6 +37,14 @@
                 <input is="emby-input" type="text" data-id="txtRepositoryName" required="required"
                     label="Collection Name:" />
                 <span>The collection name.</span>
+            </div>
+            <div class="inputContainer">
+                <span>Collection Type: </span>
+                <select is="emby-select" class="emby-select-withcolor emby-select" data-id="collectTypeSelect">
+                    <option value="0">Collection</option>
+                    <option value="1">Playlist</option>
+                </select>
+                <span>Whether the list should create a collection or playlist</span>
             </div>
             <div id="urlContainer">
             </div>
@@ -78,6 +80,7 @@
             addSet: function (set) {
                 const template = CollectionImport.template.cloneNode(true).content;
                 template.querySelector("[data-id=txtRepositoryName]").value = set.Name || "";
+                template.querySelector("[data-id=collectTypeSelect]").value = set.UsePlaylistsOverCollections ? '1' : '0';
                 
                 for (let i = 0; i < set.Urls.length; i++) {
                     CollectionImport.addUrl(template, set.Urls[i]);
@@ -87,7 +90,8 @@
             addSetNew: function () {
               const set = {
                         Name: "",
-                        Urls: []
+                        Urls: [],
+                        UsePlaylistsOverCollections: false 
                     };
                CollectionImport.addSet(set);
             },
@@ -109,15 +113,15 @@
                 e.preventDefault();
                 Dashboard.showLoadingMsg();
                 const config = {
-                    ImportSets: [],
-                    UsePlaylistsOverCollections: document.getElementById("collectTypeSelect").value === '1'
+                    ImportSets: []
                 };
 
                 const configs = document.querySelectorAll("[data-id=repo-config]");
                 for (let i = 0; i < configs.length; i++) {
                     const repo = {
                         Name: configs[i].querySelector("[data-id=txtRepositoryName]").value,
-                        Urls: []
+                        Urls: [],
+                        UsePlaylistsOverCollections: configs[i].querySelector("[data-id=collectTypeSelect]").value === '1'
                     };
 
                     if (repo.Name == "") {
@@ -153,7 +157,6 @@
                         for (let i = 0; i < config.ImportSets.length; i++) {
                             CollectionImport.addSet(config.ImportSets[i]);
                         }
-                        document.getElementById("collectTypeSelect").value = config.UsePlaylistsOverCollections ? "1" : "0";
                     })
                     .catch(function (error) {
                         console.error(error);
