@@ -1,4 +1,4 @@
-Create collections from external sources and match sorting.
+Create collections or playlists from external sources and match sorting.
 
 Currently mdblist is supported
 
