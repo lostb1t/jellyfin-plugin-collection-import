@@ -1,6 +1,4 @@
-Create collections or playlists from external sources and match sorting.
-
-Currently mdblist is supported
+Create collections or playlists from external sources like mdblist.
 
 Add the following repo for this plugin: https://raw.githubusercontent.com/lostb1t/jellyfin-plugin-collection-import/main/manifest.json
 
