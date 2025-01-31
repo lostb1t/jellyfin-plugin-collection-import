@@ -1,4 +1,4 @@
-export VERSION := 0.37.0.0
+export VERSION := 0.38.0.0
 export GITHUB_REPO := lostb1t/jellyfin-plugin-collection-import
 export FILE := collection-import-${VERSION}.zip
 
