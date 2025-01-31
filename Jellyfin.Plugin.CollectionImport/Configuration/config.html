@@ -38,6 +38,14 @@
                     label="Collection Name:" />
                 <span>The collection name.</span>
             </div>
+            <div class="inputContainer">
+                <span>Collection Type: </span>
+                <select is="emby-select" class="emby-select-withcolor emby-select" data-id="collectTypeSelect">
+                    <option value="0">Collection</option>
+                    <option value="1">Playlist</option>
+                </select>
+                <span>Whether the list should create a collection or playlist</span>
+            </div>
             <div id="urlContainer">
             </div>
             <button id="btnAddUrl" is="emby-button" type="button" class="raised button block">
@@ -72,6 +80,7 @@
             addSet: function (set) {
                 const template = CollectionImport.template.cloneNode(true).content;
                 template.querySelector("[data-id=txtRepositoryName]").value = set.Name || "";
+                template.querySelector("[data-id=collectTypeSelect]").value = set.UsePlaylistsOverCollections ? '1' : '0';
                 
                 for (let i = 0; i < set.Urls.length; i++) {
                     CollectionImport.addUrl(template, set.Urls[i]);
@@ -81,7 +90,8 @@
             addSetNew: function () {
               const set = {
                         Name: "",
-                        Urls: []
+                        Urls: [],
+                        UsePlaylistsOverCollections: false 
                     };
                CollectionImport.addSet(set);
             },
@@ -110,7 +120,8 @@
                 for (let i = 0; i < configs.length; i++) {
                     const repo = {
                         Name: configs[i].querySelector("[data-id=txtRepositoryName]").value,
-                        Urls: []
+                        Urls: [],
+                        UsePlaylistsOverCollections: configs[i].querySelector("[data-id=collectTypeSelect]").value === '1'
                     };
 
                     if (repo.Name == "") {

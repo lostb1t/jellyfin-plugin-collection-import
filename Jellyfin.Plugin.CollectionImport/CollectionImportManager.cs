@@ -25,6 +25,8 @@ using Microsoft.Extensions.Hosting;
 using Jellyfin.Data.Entities;
 using Jellyfin.Plugin.CollectionImport.Configuration;
 using System.Security.Cryptography.X509Certificates;
+using MediaBrowser.Controller.Playlists;
+using MediaBrowser.Model.Playlists;
 
 namespace Jellyfin.Plugin.CollectionImport;
 
@@ -37,6 +39,7 @@ public class CollectionImportManager
     private readonly ILibraryManager _libraryManager;
     private readonly MdbClientManager _mdbClientManager;
     private readonly ICollectionManager _collectionManager;
+    private readonly IPlaylistManager _playlistManager;
     private readonly IUserManager _userManager;
 
     private readonly User _adminUser;
@@ -48,6 +51,7 @@ public class CollectionImportManager
         IItemRepository itemRepo,
         ILibraryManager libraryManager,
         ICollectionManager collectionManager,
+        IPlaylistManager playlistManager,
         IUserManager userManager,
         MdbClientManager mdbClientManager)
     {
@@ -57,6 +61,7 @@ public class CollectionImportManager
         _itemRepo = itemRepo;
         _libraryManager = libraryManager;
         _collectionManager = collectionManager;
+        _playlistManager = playlistManager;
         _userManager = userManager;
         _mdbClientManager = mdbClientManager;
         _adminUser = _userManager.Users
@@ -64,27 +69,8 @@ public class CollectionImportManager
             .First();
     }
 
-    public async Task SyncCollection(ImportSet set, IEnumerable<BaseItem> dbItems, CancellationToken cancellationToken)
+    private async Task<IEnumerable<Guid>> GetItemIdsFromMdb(ImportSet set, IEnumerable<BaseItem> dbItems)
     {
-        _logger.LogInformation("Syncing {Name}", set.Name);
-        if (set.Urls.Length == 0)
-        {
-            return;
-        }
-        var collection = GetBoxSetByName(set.Name);
-        if (collection is null)
-        {
-            _logger.LogInformation("{Name} not found, creating.", set.Name);
-            collection = await _collectionManager.CreateCollectionAsync(new CollectionCreationOptions
-            {
-                Name = set.Name,
-                IsLocked = true
-            });
-            collection.Tags = new[] { "collectionimport" };
-            collection.DisplayOrder = "Default";
-        }
-
-        collection.DisplayOrder = "Default";
         IEnumerable<IEnumerable<Guid>> idSets = Array.Empty<IEnumerable<Guid>>();
 
         foreach (string url in set.Urls)
@@ -108,7 +94,32 @@ public class CollectionImportManager
 #pragma warning restore CS8604 // Possible null reference argument.
 
         }
-        var ids = Interleave(idSets);
+        return Interleave(idSets);
+    }
+    
+    public async Task SyncCollection(ImportSet set, IEnumerable<BaseItem> dbItems, CancellationToken cancellationToken)
+    {
+        _logger.LogInformation("Syncing {Name}", set.Name);
+        if (set.Urls.Length == 0)
+        {
+            return;
+        }
+        var collection = GetBoxSetByName(set.Name);
+        if (collection is null)
+        {
+            _logger.LogInformation("{Name} not found, creating.", set.Name);
+            collection = await _collectionManager.CreateCollectionAsync(new CollectionCreationOptions
+            {
+                Name = set.Name,
+                IsLocked = true
+            });
+            collection.Tags = new[] { "collectionimport" };
+            collection.DisplayOrder = "Default";
+        }
+
+        collection.DisplayOrder = "Default";
+        
+        var ids = await GetItemIdsFromMdb(set, dbItems);
 
         // we need to clear it first, otherwise sorting is not applied.
         var children = collection.GetChildren(_adminUser, true);
@@ -117,9 +128,47 @@ public class CollectionImportManager
         await _collectionManager.AddToCollectionAsync(collection.Id, ids).ConfigureAwait(true);
     }
 
+    public async Task SyncPlaylist(ImportSet set, IEnumerable<BaseItem> dbItems, CancellationToken cancellationToken)
+    {
+        _logger.LogInformation("Syncing {Name}", set.Name);
+        if (set.Urls.Length == 0)
+        {
+            return;
+        }
+        var playlist = GetPlaylistByName(set.Name);
+        if (playlist is null)
+        {
+            _logger.LogInformation("{Name} not found, creating.", set.Name);
+
+            var playlistId = (await _playlistManager.CreatePlaylist(new PlaylistCreationRequest
+            {
+                Name = set.Name,
+                Public = true,
+                UserId = _adminUser.Id
+            })).Id;
+
+            if (Guid.TryParse(playlistId, out Guid playlistGuid))
+            {
+                playlist = _playlistManager.GetPlaylistForUser(playlistGuid, _adminUser.Id);
+                playlist.Tags = new[] { "collectionimport" };
+            }
+        }
+
+        var ids = await GetItemIdsFromMdb(set, dbItems);
+
+        // we need to clear it first, otherwise sorting is not applied.
+        if (playlist is not null)
+        {
+            var children = playlist.GetChildren(_adminUser, true);
+            await _playlistManager.RemoveItemFromPlaylistAsync(playlist.Id.ToString(), children.Select(i => i.Id.ToString())).ConfigureAwait(true);
+
+            await _playlistManager.AddItemToPlaylistAsync(playlist.Id, ids.ToList(), _adminUser.Id).ConfigureAwait(true);
+        }
+    }
+
     public async Task Sync(IProgress<double> progress, CancellationToken cancellationToken)
     {
-        _logger.LogInformation("Refreshing collections");
+        _logger.LogInformation("Refreshing lists");
         var collections = CollectionImportPlugin.Instance!.Configuration.ImportSets;
 
         // i have no idea howto query for imdbid at this point so so it the slow way for now.
@@ -137,7 +186,14 @@ public class CollectionImportManager
         var done = 0;
         await Parallel.ForEachAsync(collections, options, async (i, ct) =>
         {
-            await SyncCollection(i, dbItems, ct);
+            if (i.UsePlaylistsOverCollections)
+            {
+                await SyncPlaylist(i, dbItems, ct);
+            }
+            else
+            {
+                await SyncCollection(i, dbItems, ct);
+            }
             done++;
             progress.Report(Convert.ToDouble(100 / collections.Length * done));
         });
@@ -153,6 +209,12 @@ public class CollectionImportManager
             Tags = new[] { "collectionimport" },
             Name = name,
         }).Select(b => b as BoxSet).FirstOrDefault();
+    }
+    
+    public Playlist? GetPlaylistByName(string name)
+    {
+        return _playlistManager.GetPlaylists(_adminUser.Id)
+            .FirstOrDefault(p => p.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
     }
 
     public ICollection<BoxSet?> GetBoxSetByIds(Guid[] ids)
