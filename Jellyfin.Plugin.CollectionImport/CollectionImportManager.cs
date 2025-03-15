@@ -162,6 +162,7 @@ public class CollectionImportManager
             return;
         }
         var collection = GetBoxSetByName(set.Name);
+        var created = false;
         if (collection is null)
         {
             _logger.LogInformation("{Name} not found, creating.", set.Name);
@@ -172,6 +173,7 @@ public class CollectionImportManager
             });
             collection.Tags = new[] { "collectionimport" };
             collection.DisplayOrder = "Default";
+            created = true;
         }
 
         collection.DisplayOrder = "Default";
@@ -183,7 +185,9 @@ public class CollectionImportManager
         await _collectionManager.RemoveFromCollectionAsync(collection.Id, children.Select(i => i.Id)).ConfigureAwait(true);
 
         await _collectionManager.AddToCollectionAsync(collection.Id, ids).ConfigureAwait(true);
-        await SetPhotoForCollection(collection);
+        if (created) {
+            await SetPhotoForCollection(collection);
+        }
     }
 
     public async Task SyncPlaylist(ImportSet set, IEnumerable<BaseItem> dbItems, CancellationToken cancellationToken)
