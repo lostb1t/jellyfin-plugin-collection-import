@@ -27,6 +27,7 @@ using Jellyfin.Plugin.CollectionImport.Configuration;
 using System.Security.Cryptography.X509Certificates;
 using MediaBrowser.Controller.Playlists;
 using MediaBrowser.Model.Playlists;
+using MediaBrowser.Controller.Entities.TV;
 
 namespace Jellyfin.Plugin.CollectionImport;
 
@@ -96,7 +97,63 @@ public class CollectionImportManager
         }
         return Interleave(idSets);
     }
-    
+
+    private async Task SetPhotoForCollection(BoxSet collection)
+    {
+        try
+        {
+            var query = new InternalItemsQuery
+            {
+                Recursive = true
+            };
+
+            var items = collection.GetItems(query)
+                .Items
+                .Where(item => item is Movie || item is Series)
+                .ToList();
+
+            _logger.LogDebug("Found {Count} items in collection {CollectionName}",
+                items.Count, collection.Name);
+
+            var firstItemWithImage = items
+                .FirstOrDefault(item =>
+                    item.ImageInfos != null &&
+                    item.ImageInfos.Any(i => i.Type == ImageType.Primary));
+
+            if (firstItemWithImage != null)
+            {
+                var imageInfo = firstItemWithImage.ImageInfos
+                    .First(i => i.Type == ImageType.Primary);
+
+                // Simply set the image path directly
+                collection.SetImage(new ItemImageInfo
+                {
+                    Path = imageInfo.Path,
+                    Type = ImageType.Primary
+                }, 0);
+
+                await _libraryManager.UpdateItemAsync(
+                    collection,
+                    collection.GetParent(),
+                    ItemUpdateType.ImageUpdate,
+                    CancellationToken.None);
+                _logger.LogInformation("Successfully set image for collection {CollectionName} from {ItemName}",
+                    collection.Name, firstItemWithImage.Name);
+            }
+            else
+            {
+                _logger.LogWarning("No items with images found in collection {CollectionName}. Items: {Items}",
+                    collection.Name,
+                    string.Join(", ", items.Select(i => i.Name)));
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error setting image for collection {CollectionName}",
+                collection.Name);
+        }
+    }
+
     public async Task SyncCollection(ImportSet set, IEnumerable<BaseItem> dbItems, CancellationToken cancellationToken)
     {
         _logger.LogInformation("Syncing {Name}", set.Name);
@@ -105,6 +162,7 @@ public class CollectionImportManager
             return;
         }
         var collection = GetBoxSetByName(set.Name);
+        var created = false;
         if (collection is null)
         {
             _logger.LogInformation("{Name} not found, creating.", set.Name);
@@ -115,10 +173,11 @@ public class CollectionImportManager
             });
             collection.Tags = new[] { "collectionimport" };
             collection.DisplayOrder = "Default";
+            created = true;
         }
 
         collection.DisplayOrder = "Default";
-        
+
         var ids = await GetItemIdsFromMdb(set, dbItems);
 
         // we need to clear it first, otherwise sorting is not applied.
@@ -126,6 +185,9 @@ public class CollectionImportManager
         await _collectionManager.RemoveFromCollectionAsync(collection.Id, children.Select(i => i.Id)).ConfigureAwait(true);
 
         await _collectionManager.AddToCollectionAsync(collection.Id, ids).ConfigureAwait(true);
+        if (created) {
+            await SetPhotoForCollection(collection);
+        }
     }
 
     public async Task SyncPlaylist(ImportSet set, IEnumerable<BaseItem> dbItems, CancellationToken cancellationToken)
@@ -210,7 +272,7 @@ public class CollectionImportManager
             Name = name,
         }).Select(b => b as BoxSet).FirstOrDefault();
     }
-    
+
     public Playlist? GetPlaylistByName(string name)
     {
         return _playlistManager.GetPlaylists(_adminUser.Id)
