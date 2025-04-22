@@ -178,7 +178,8 @@ public class CollectionImportManager
 
         collection.DisplayOrder = "Default";
 
-        var ids = await GetItemIdsFromMdb(set, dbItems);
+        var filteredDbItems = dbItems.Where(item => !set.ExcludedLibraries.Contains(item.Path));
+        var ids = await GetItemIdsFromMdb(set, filteredDbItems);
 
         // we need to clear it first, otherwise sorting is not applied.
         var children = collection.GetChildren(_adminUser, true);
@@ -216,7 +217,8 @@ public class CollectionImportManager
             }
         }
 
-        var ids = await GetItemIdsFromMdb(set, dbItems);
+        var filteredDbItems = dbItems.Where(item => !set.ExcludedLibraries.Contains(item.Path));
+        var ids = await GetItemIdsFromMdb(set, filteredDbItems);
 
         // we need to clear it first, otherwise sorting is not applied.
         if (playlist is not null)

@@ -24,4 +24,6 @@ public class ImportSet
   
   [Required]
   public bool UsePlaylistsOverCollections { get; set; } = false;
+
+  public string[] ExcludedLibraries { get; set; } = Array.Empty<string>();
 }
