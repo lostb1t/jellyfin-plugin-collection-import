@@ -47,9 +47,9 @@
                 <span>Whether the list should create a collection or playlist</span>
             </div>
             <div class="inputContainer">
-                <span>Excluded Libraries: </span>
-                <textarea is="emby-textarea" class="emby-textarea" data-id="excludedLibraries" placeholder="Enter library paths to exclude, separated by commas"></textarea>
-                <span>Specify the libraries to exclude from the collection import.</span>
+                <input is="emby-input" type="text" data-id="excludedLibraries"
+                    label="Excluded Libraries:" />
+                <span>Specify the libraries to exclude from the collection import. Enter library paths, separated by commas</span>
             </div>
             <div id="urlContainer">
             </div>
