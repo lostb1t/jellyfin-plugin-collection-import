@@ -179,6 +179,9 @@ public class CollectionImportManager
         collection.DisplayOrder = "Default";
 
         var filteredDbItems = dbItems.Where(item => !set.ExcludedLibraries.Contains(item.Path));
+        var allowedItemKind = new[] { BaseItemKind.TvProgram, BaseItemKind.Movie };
+        filteredDbItems = filteredDbItems.Where(item => allowedItemKind.Contains(item.GetBaseItemKind()));
+
         var ids = await GetItemIdsFromMdb(set, filteredDbItems);
 
         // we need to clear it first, otherwise sorting is not applied.
