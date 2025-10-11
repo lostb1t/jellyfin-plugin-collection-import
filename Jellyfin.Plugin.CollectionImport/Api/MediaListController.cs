@@ -16,7 +16,7 @@ using System.Threading.Tasks;
 // using Jellyfin.Api.Helpers;
 // using Jellyfin.Api.ModelBinders;
 // using Jellyfin.Api.Models.LibraryDtos;
-using Jellyfin.Data.Entities;
+using Jellyfin.Database.Implementations.Entities;
 using Jellyfin.Data.Enums;
 using Jellyfin.Extensions;
 using MediaBrowser.Common.Api;
