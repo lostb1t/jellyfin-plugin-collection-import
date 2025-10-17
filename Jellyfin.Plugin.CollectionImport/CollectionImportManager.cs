@@ -76,35 +76,17 @@ public class CollectionImportManager
         
         // Check if URL already has query parameters
         var queryIndex = trimmedUrl.IndexOf('?', StringComparison.Ordinal);
-        string pathPart;
-        string queryPart = string.Empty;
-        
-        if (queryIndex >= 0)
-        {
-            pathPart = trimmedUrl.Substring(0, queryIndex);
-            queryPart = trimmedUrl.Substring(queryIndex);
-        }
-        else
-        {
-            pathPart = trimmedUrl;
-        }
+        var pathPart = queryIndex >= 0 ? trimmedUrl.Substring(0, queryIndex) : trimmedUrl;
+        var queryPart = queryIndex >= 0 ? trimmedUrl.Substring(queryIndex) : string.Empty;
         
         // Add /json to the path part
         var url = pathPart + "/json";
         
         // Add cache-busting parameter with current Unix timestamp
-        var unixTimestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
-        var cacheBuster = $"_t={unixTimestamp}";
+        var cacheBuster = $"_t={DateTimeOffset.UtcNow.ToUnixTimeSeconds()}";
         
         // Append query parameters
-        if (!string.IsNullOrEmpty(queryPart))
-        {
-            url += queryPart + "&" + cacheBuster;
-        }
-        else
-        {
-            url += "?" + cacheBuster;
-        }
+        url += !string.IsNullOrEmpty(queryPart) ? queryPart + "&" + cacheBuster : "?" + cacheBuster;
 
         return url;
     }
