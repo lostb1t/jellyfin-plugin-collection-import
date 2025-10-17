@@ -70,38 +70,40 @@ public class CollectionImportManager
             .First();
     }
 
-    private string BuildMdbUrl(string baseUrl, ImportSet set)
+    private string BuildMdbUrl(string baseUrl)
     {
-        var url = baseUrl.TrimEnd(new Char[] { '/' }) + "/json";
-        var queryParams = new List<string>();
-
-        if (!string.IsNullOrEmpty(set.SortTraktId))
+        var trimmedUrl = baseUrl.TrimEnd(new Char[] { '/' });
+        
+        // Check if URL already has query parameters
+        var queryIndex = trimmedUrl.IndexOf('?', StringComparison.Ordinal);
+        string pathPart;
+        string queryPart = string.Empty;
+        
+        if (queryIndex >= 0)
         {
-            queryParams.Add($"s_traktid={Uri.EscapeDataString(set.SortTraktId)}");
+            pathPart = trimmedUrl.Substring(0, queryIndex);
+            queryPart = trimmedUrl.Substring(queryIndex);
         }
-
-        if (!string.IsNullOrEmpty(set.SortAction))
+        else
         {
-            queryParams.Add($"s_action={Uri.EscapeDataString(set.SortAction)}");
+            pathPart = trimmedUrl;
         }
-
-        if (!string.IsNullOrEmpty(set.Sort))
-        {
-            queryParams.Add($"sort={Uri.EscapeDataString(set.Sort)}");
-        }
-
-        if (!string.IsNullOrEmpty(set.SortOrder))
-        {
-            queryParams.Add($"sortorder={Uri.EscapeDataString(set.SortOrder)}");
-        }
-
+        
+        // Add /json to the path part
+        var url = pathPart + "/json";
+        
         // Add cache-busting parameter with current Unix timestamp
         var unixTimestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
-        queryParams.Add($"_t={unixTimestamp}");
-
-        if (queryParams.Count > 0)
+        var cacheBuster = $"_t={unixTimestamp}";
+        
+        // Append query parameters
+        if (!string.IsNullOrEmpty(queryPart))
         {
-            url += "?" + string.Join("&", queryParams);
+            url += queryPart + "&" + cacheBuster;
+        }
+        else
+        {
+            url += "?" + cacheBuster;
         }
 
         return url;
@@ -113,7 +115,7 @@ public class CollectionImportManager
 
         foreach (string url in set.Urls)
         {
-            var requestUrl = BuildMdbUrl(url, set);
+            var requestUrl = BuildMdbUrl(url);
             var items = await _mdbClientManager.Request(requestUrl);
             var providerIds = new List<string>();
 
