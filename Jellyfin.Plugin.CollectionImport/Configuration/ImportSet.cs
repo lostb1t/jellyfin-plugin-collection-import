@@ -26,4 +26,12 @@ public class ImportSet
   public bool UsePlaylistsOverCollections { get; set; } = false;
 
   public string[] ExcludedLibraries { get; set; } = Array.Empty<string>();
+
+  public string? SortTraktId { get; set; }
+
+  public string? SortAction { get; set; }
+
+  public string? Sort { get; set; }
+
+  public string? SortOrder { get; set; }
 }

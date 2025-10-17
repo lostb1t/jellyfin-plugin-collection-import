@@ -70,13 +70,51 @@ public class CollectionImportManager
             .First();
     }
 
+    private string BuildMdbUrl(string baseUrl, ImportSet set)
+    {
+        var url = baseUrl.TrimEnd(new Char[] { '/' }) + "/json";
+        var queryParams = new List<string>();
+
+        if (!string.IsNullOrEmpty(set.SortTraktId))
+        {
+            queryParams.Add($"s_traktid={Uri.EscapeDataString(set.SortTraktId)}");
+        }
+
+        if (!string.IsNullOrEmpty(set.SortAction))
+        {
+            queryParams.Add($"s_action={Uri.EscapeDataString(set.SortAction)}");
+        }
+
+        if (!string.IsNullOrEmpty(set.Sort))
+        {
+            queryParams.Add($"sort={Uri.EscapeDataString(set.Sort)}");
+        }
+
+        if (!string.IsNullOrEmpty(set.SortOrder))
+        {
+            queryParams.Add($"sortorder={Uri.EscapeDataString(set.SortOrder)}");
+        }
+
+        // Add cache-busting parameter with current Unix timestamp
+        var unixTimestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+        queryParams.Add($"_t={unixTimestamp}");
+
+        if (queryParams.Count > 0)
+        {
+            url += "?" + string.Join("&", queryParams);
+        }
+
+        return url;
+    }
+
     private async Task<IEnumerable<Guid>> GetItemIdsFromMdb(ImportSet set, IEnumerable<BaseItem> dbItems)
     {
         IEnumerable<IEnumerable<Guid>> idSets = Array.Empty<IEnumerable<Guid>>();
 
         foreach (string url in set.Urls)
         {
-            var items = await _mdbClientManager.Request(url.TrimEnd(new Char[] { '/' }) + "/json");
+            var requestUrl = BuildMdbUrl(url, set);
+            var items = await _mdbClientManager.Request(requestUrl);
             var providerIds = new List<string>();
 
             foreach (MdbItem i in items)
