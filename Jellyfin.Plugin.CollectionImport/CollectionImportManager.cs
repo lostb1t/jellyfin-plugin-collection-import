@@ -70,13 +70,35 @@ public class CollectionImportManager
             .First();
     }
 
+    private string BuildMdbUrl(string baseUrl)
+    {
+        var trimmedUrl = baseUrl.TrimEnd(new Char[] { '/' });
+        
+        // Check if URL already has query parameters
+        var queryIndex = trimmedUrl.IndexOf('?', StringComparison.Ordinal);
+        var pathPart = queryIndex >= 0 ? trimmedUrl.Substring(0, queryIndex) : trimmedUrl;
+        var queryPart = queryIndex >= 0 ? trimmedUrl.Substring(queryIndex) : string.Empty;
+        
+        // Add /json to the path part
+        var url = pathPart + "/json";
+        
+        // Add cache-busting parameter with current Unix timestamp
+        var cacheBuster = $"_t={DateTimeOffset.UtcNow.ToUnixTimeSeconds()}";
+        
+        // Append query parameters
+        url += !string.IsNullOrEmpty(queryPart) ? queryPart + "&" + cacheBuster : "?" + cacheBuster;
+
+        return url;
+    }
+
     private async Task<IEnumerable<Guid>> GetItemIdsFromMdb(ImportSet set, IEnumerable<BaseItem> dbItems)
     {
         IEnumerable<IEnumerable<Guid>> idSets = Array.Empty<IEnumerable<Guid>>();
 
         foreach (string url in set.Urls)
         {
-            var items = await _mdbClientManager.Request(url.TrimEnd(new Char[] { '/' }) + "/json");
+            var requestUrl = BuildMdbUrl(url);
+            var items = await _mdbClientManager.Request(requestUrl);
             var providerIds = new List<string>();
 
             foreach (MdbItem i in items)
