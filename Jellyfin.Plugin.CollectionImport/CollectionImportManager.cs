@@ -22,7 +22,9 @@ using MediaBrowser.Model.IO;
 using MediaBrowser.Model.LiveTv;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Hosting;
-using Jellyfin.Data.Entities;
+using Jellyfin.Database.Implementations.Entities;
+using Jellyfin.Database.Implementations.Enums;
+using Jellyfin.Data;
 using Jellyfin.Plugin.CollectionImport.Configuration;
 using System.Security.Cryptography.X509Certificates;
 using MediaBrowser.Controller.Playlists;
@@ -207,7 +209,7 @@ public class CollectionImportManager
         var ids = await GetItemIdsFromMdb(set, filteredDbItems);
 
         // we need to clear it first, otherwise sorting is not applied.
-        var children = collection.GetChildren(_adminUser, true);
+        var children = collection.GetChildren(_adminUser, true, new InternalItemsQuery());
         await _collectionManager.RemoveFromCollectionAsync(collection.Id, children.Select(i => i.Id)).ConfigureAwait(true);
 
         await _collectionManager.AddToCollectionAsync(collection.Id, ids).ConfigureAwait(true);
@@ -248,7 +250,7 @@ public class CollectionImportManager
         // we need to clear it first, otherwise sorting is not applied.
         if (playlist is not null)
         {
-            var children = playlist.GetChildren(_adminUser, true);
+            var children = playlist.GetChildren(_adminUser, true, new InternalItemsQuery());
             await _playlistManager.RemoveItemFromPlaylistAsync(playlist.Id.ToString(), children.Select(i => i.Id.ToString())).ConfigureAwait(true);
 
             await _playlistManager.AddItemToPlaylistAsync(playlist.Id, ids.ToList(), _adminUser.Id).ConfigureAwait(true);
