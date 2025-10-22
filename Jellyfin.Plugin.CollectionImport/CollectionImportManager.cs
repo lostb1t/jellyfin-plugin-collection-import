@@ -265,8 +265,10 @@ public class CollectionImportManager
         // i have no idea howto query for imdbid at this point so so it the slow way for now.
         var dbItems = _itemRepo.GetItemList(new InternalItemsQuery
         {
-            HasImdbId = true
-        }).Where(i => !string.IsNullOrEmpty(i.GetProviderId(MetadataProvider.Imdb)));
+            HasAnyProviderId = new() { { "Imdb", string.Empty } },
+        })
+       // .Where(i => string.IsNullOrEmpty(i.PrimaryVersionId))
+        .Where(i => !string.IsNullOrEmpty(i.GetProviderId(MetadataProvider.Imdb)));
 
         var options = new ParallelOptions()
         {
